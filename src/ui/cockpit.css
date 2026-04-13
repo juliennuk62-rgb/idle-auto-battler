@@ -214,20 +214,17 @@
 .map-container {
   position: relative;
   flex: 1;
+  min-height: 0; /* crucial pour que flex shrink fonctionne */
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
-  aspect-ratio: 1200 / 800;
-  max-height: 100%;
   background: var(--bg-panel);
-  box-shadow: inset 2px 2px 0 var(--border-accent), inset -2px -2px 0 var(--bg-root);
   overflow: hidden;
 }
 
 .map-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* contenu entier visible, pas de crop */
   image-rendering: pixelated;
 }
 
