@@ -227,8 +227,8 @@ function startCombat(biomeId, dungeonData) {
 
 function onCombatEnd(result) {
   hideGame();
-
-  // (Ancien flow donjon auto-battler retiré — les donjons passent par dungeon_combat)
+  // Déverrouille l'équipement — on n'est plus en combat
+  ItemSystem.equipmentLocked = false;
 
   // Mode biome normal → retour carte.
   if (result) {
@@ -298,6 +298,7 @@ function startDungeonCombat(data) {
 
   dungeonGame.registry.set('onDungeonCombatEnd', (result) => {
     hideDungeonCombat();
+    ItemSystem.equipmentLocked = false;
     if (result.quit) {
       // Quitter manuellement → retour menu (la save est conservée)
       navigateTo('menu');
