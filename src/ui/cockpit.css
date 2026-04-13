@@ -49,16 +49,14 @@
 
 .menu-screen {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  overflow-y: auto;
-  padding: 20px 0;
 }
 
 .menu-container {
   text-align: center;
-  max-width: 500px;
-  width: 90%;
+  max-width: 700px;
+  width: 95%;
   padding: 20px 16px;
 }
 
@@ -79,8 +77,8 @@
 }
 
 .menu-buttons {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
 
@@ -2151,24 +2149,28 @@ li {
 
 @media (max-height: 900px) {
   .menu-title { font-size: 22px; }
-  .menu-btn { padding: 10px 16px; gap: 10px; }
+  .menu-btn { padding: 10px 14px; gap: 8px; }
   .menu-btn-icon { font-size: 18px; }
-  .menu-btn-label { font-size: 12px; }
-  .menu-btn-desc { font-size: 10px; }
+  .menu-btn-label { font-size: 11px; }
+  .menu-btn-desc { font-size: 9px; }
   .menu-buttons { gap: 6px; }
-  .menu-container { padding: 12px 16px; }
+  .menu-container { padding: 10px 16px; }
+  .menu-subtitle { margin-bottom: 12px; }
 }
 
 @media (max-height: 700px) {
   .menu-title { font-size: 18px; margin-bottom: 4px; }
-  .menu-subtitle { font-size: 11px; margin-bottom: 6px; }
-  .menu-btn { padding: 8px 14px; gap: 8px; }
-  .menu-btn-icon { font-size: 16px; }
-  .menu-btn-label { font-size: 11px; }
-  .menu-btn-desc { font-size: 9px; }
+  .menu-subtitle { font-size: 11px; margin-bottom: 8px; }
+  .menu-btn { padding: 8px 10px; gap: 6px; }
+  .menu-btn-icon { font-size: 15px; }
+  .menu-btn-label { font-size: 10px; }
+  .menu-btn-desc { font-size: 8px; }
   .menu-buttons { gap: 4px; }
-  .menu-container { padding: 8px 12px; }
-  .menu-user { font-size: 11px; }
+  .menu-container { padding: 6px 12px; }
+}
+
+@media (max-width: 500px) {
+  .menu-buttons { grid-template-columns: 1fr; }
 }
 
 /* ── Scrollbars pixel-cohérentes ─────────────────────────── */
