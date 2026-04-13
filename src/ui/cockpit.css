@@ -173,13 +173,20 @@
 
 /* ── Map Screen ──────────────────────────────────────────── */
 
+.map-screen {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .map-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
+  gap: 12px;
+  padding: 10px 20px;
   background: var(--bg-panel);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  flex-shrink: 0;
 }
 
 .map-back-btn {
@@ -206,10 +213,12 @@
 
 .map-container {
   position: relative;
+  flex: 1;
   width: 100%;
   max-width: 1200px;
-  margin: 40px auto;
+  margin: 0 auto;
   aspect-ratio: 1200 / 800;
+  max-height: 100%;
   background: var(--bg-panel);
   box-shadow: inset 2px 2px 0 var(--border-accent), inset -2px -2px 0 var(--bg-root);
   overflow: hidden;
