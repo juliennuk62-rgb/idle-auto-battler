@@ -6,11 +6,13 @@ import { GachaSystem } from '../systems/GachaSystem.js';
 import { HEROES, HERO_RARITIES } from '../data/heroes.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
 
-const TEAM_SLOTS = [
-  { id: 'u1', class: 'warrior', name: 'Guerrier', sprite: 'warrior', color: '#22c55e' },
-  { id: 'u2', class: 'archer',  name: 'Archer',   sprite: 'archer',  color: '#fbbf24' },
-  { id: 'u3', class: 'mage',    name: 'Mage',     sprite: 'mage',    color: '#60a5fa' },
-  { id: 'u4', class: 'healer',  name: 'Healer',   sprite: 'healer',  color: '#a855f7' },
+// 5 slots fixes — les IDs matchent ceux utilisés par CombatScene._createDefaultTeam()
+export const TEAM_SLOTS = [
+  { id: 'slot_1', class: 'warrior', name: 'Guerrier 1', sprite: 'warrior', color: '#22c55e' },
+  { id: 'slot_2', class: 'warrior', name: 'Guerrier 2', sprite: 'warrior', color: '#3b82f6' },
+  { id: 'slot_3', class: 'archer',  name: 'Archer',     sprite: 'archer',  color: '#fbbf24' },
+  { id: 'slot_4', class: 'mage',    name: 'Mage',       sprite: 'mage',    color: '#60a5fa' },
+  { id: 'slot_5', class: 'healer',  name: 'Healer',     sprite: 'healer',  color: '#a855f7' },
 ];
 
 export class TeamScreen {

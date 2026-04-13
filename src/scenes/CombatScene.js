@@ -12,6 +12,7 @@ import { ResourceSystem } from '../systems/ResourceSystem.js';
 import { SaveSystem } from '../systems/SaveSystem.js';
 import { PrestigeSystem } from '../systems/PrestigeSystem.js';
 import { ItemSystem } from '../systems/ItemSystem.js';
+import { GachaSystem } from '../systems/GachaSystem.js';
 
 // Scène principale : combat auto avec classes, grades, vagues, biomes,
 // économie et sauvegarde. Charge depuis localStorage si une save existe.
@@ -590,74 +591,43 @@ export class CombatScene extends Phaser.Scene {
   // ---------------------------------------------------------------------------
 
   _createDefaultTeam() {
-    // Le prestige peut octroyer un grade de départ supérieur pour le
-    // premier guerrier (bonus "Soldat de départ").
     const startGrade = PrestigeSystem.getStartingGrade();
 
-    // Formation complète 4 classes :
-    //   Front (x=250) : 2 guerriers
-    //   Back  (x=110) : 1 archer, 1 mage, 1 soigneur
-    // Formation en V / quinconce — aucun allié n'est exactement aligné
-    // en X ou en Y avec un autre. Chaque unité a sa position unique pour
-    // que le joueur puisse les distinguer visuellement sans chevauchement.
-    //
-    //   Back                      Front
-    // Formation : Guerriers DEVANT → Archer MILIEU → Mage MILIEU-ARR → Healer ARRIÈRE
-    //
-    //  Healer (60,435)  Mage (100,400)  Archer (160,370)  Guerrier1 (260,385)
-    //                                                       Guerrier2 (280,430)
-    //
-    const w1 = new Fighter(this, 260, 375, {
-      ...BALANCE.warrior,
-      name: 'Guerrier 1',
-      grade: startGrade,
-      spriteKey: 'warrior',
-      spriteScale: 1.4,
-      color: 0x3b82f6,
-      facing: 1,
+    // Définition des 5 slots avec IDs fixes (matchent TeamScreen.TEAM_SLOTS)
+    const SLOTS = [
+      { id: 'slot_1', class: 'warrior', defaultName: 'Guerrier 1', x: 260, y: 375, sprite: 'warrior', color: 0x3b82f6, grade: startGrade },
+      { id: 'slot_2', class: 'warrior', defaultName: 'Guerrier 2', x: 280, y: 425, sprite: 'warrior', color: 0x3b82f6 },
+      { id: 'slot_3', class: 'archer',  defaultName: 'Archer',     x: 160, y: 370, sprite: 'archer',  color: 0xa855f7 },
+      { id: 'slot_4', class: 'mage',    defaultName: 'Mage',       x: 100, y: 400, sprite: 'mage',    color: 0x60a5fa },
+      { id: 'slot_5', class: 'healer',  defaultName: 'Soigneur',   x: 60,  y: 435, sprite: 'healer',  color: 0x4ade80 },
+    ];
+
+    return SLOTS.map(slot => {
+      // Vérifie si un héros gacha est assigné à ce slot
+      const heroMods = GachaSystem.getHeroModifiers(slot.id);
+      const heroName = heroMods.heroName || null;
+
+      return new Fighter(this, slot.x, slot.y, {
+        ...BALANCE[slot.class],
+        id: slot.id,
+        name: heroName || slot.defaultName,
+        grade: slot.grade || 1,
+        spriteKey: slot.sprite,
+        spriteScale: 1.4,
+        color: slot.color,
+        facing: 1,
+      });
     });
-    const w2 = new Fighter(this, 280, 425, {
-      ...BALANCE.warrior,
-      name: 'Guerrier 2',
-      spriteKey: 'warrior',
-      spriteScale: 1.4,
-      color: 0x3b82f6,
-      facing: 1,
-    });
-    const archer = new Fighter(this, 160, 370, {
-      ...BALANCE.archer,
-      name: 'Archer',
-      spriteKey: 'archer',
-      spriteScale: 1.4,
-      color: 0xa855f7,
-      facing: 1,
-    });
-    const mage = new Fighter(this, 100, 400, {
-      ...BALANCE.mage,
-      name: 'Mage',
-      spriteKey: 'mage',
-      spriteScale: 1.4,
-      color: 0x60a5fa,
-      facing: 1,
-    });
-    const healer = new Fighter(this, 60, 435, {
-      ...BALANCE.healer,
-      name: 'Soigneur',
-      spriteKey: 'healer',
-      spriteScale: 1.4,
-      color: 0x4ade80,
-      facing: 1,
-    });
-    return [w1, w2, archer, mage, healer];
   }
 
   _createTeamFromSave(savedTeam) {
     const team = [];
-    // Compteur local par ligne — on ne peut PAS utiliser _computeRecruitPosition
-    // ici car this.combat n'existe pas encore à ce stade du create().
     const lineCounts = { front: 0, back: 0 };
+    const SPRITE_MAP = { warrior: 'warrior', archer: 'archer', mage: 'mage', healer: 'healer' };
+    const COLOR_MAP = { warrior: 0x3b82f6, archer: 0xa855f7, mage: 0x60a5fa, healer: 0x4ade80 };
 
-    for (const spec of savedTeam) {
+    for (let i = 0; i < savedTeam.length; i++) {
+      const spec = savedTeam[i];
       const classCfg = BALANCE[spec.class];
       if (!classCfg) continue;
 
@@ -668,15 +638,16 @@ export class CombatScene extends Phaser.Scene {
       const startY = isBack ? 370 : 380;
       const y = startY + lineCounts[line] * spacing;
       lineCounts[line]++;
-      const pos = { x, y };
-      const isArcher = spec.class === 'archer';
 
-      const SPRITE_MAP = { warrior: 'warrior', archer: 'archer', mage: 'mage', healer: 'healer' };
-      const COLOR_MAP = { warrior: 0x3b82f6, archer: 0xa855f7, mage: 0x60a5fa, healer: 0x4ade80 };
+      // ID fixe pour matcher TeamScreen + GachaSystem
+      const slotId = `slot_${i + 1}`;
+      const heroMods = GachaSystem.getHeroModifiers(slotId);
+      const heroName = heroMods.heroName || null;
 
-      const fighter = new Fighter(this, pos.x, pos.y, {
+      const fighter = new Fighter(this, x, y, {
         ...classCfg,
-        name: spec.name || (isArcher ? 'Archer' : 'Guerrier'),
+        id: slotId,
+        name: heroName || spec.name || spec.class,
         grade: spec.grade ?? 1,
         level: spec.level ?? 1,
         spriteKey: SPRITE_MAP[spec.class] || 'warrior',
@@ -685,10 +656,8 @@ export class CombatScene extends Phaser.Scene {
         facing: 1,
       });
 
-      // Restaure l'XP sans déclencher de level-up (le level est déjà correct).
       fighter.xp = spec.xp ?? 0;
       fighter._updateXpBar();
-
       team.push(fighter);
     }
     return team;
