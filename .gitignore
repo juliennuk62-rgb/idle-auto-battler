@@ -1,0 +1,14 @@
+# Dev tools
+.claude/
+node_modules/
+*.py
+__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/

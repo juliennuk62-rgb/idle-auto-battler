@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tests — TelemetrySystem</title>
+    <style>
+      body {
+        font-family: 'Consolas', 'Monaco', monospace;
+        background: #0f0f1e;
+        color: #e0e0e0;
+        padding: 24px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #60a5fa;
+        font-size: 18px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 8px;
+      }
+      .test {
+        padding: 6px 10px;
+        margin: 2px 0;
+        border-left: 3px solid transparent;
+        font-size: 13px;
+      }
+      .ok {
+        color: #4ade80;
+        border-left-color: #4ade80;
+      }
+      .fail {
+        color: #f87171;
+        border-left-color: #f87171;
+      }
+      .error {
+        color: #fca5a5;
+        margin-left: 16px;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .summary {
+        margin-top: 18px;
+        padding: 12px;
+        background: #1a1a2e;
+        border: 1px solid #333;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .summary.pass {
+        color: #4ade80;
+      }
+      .summary.fail {
+        color: #f87171;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TelemetrySystem — Tests unitaires</h1>
+    <div id="output">Running...</div>
+
+    <script type="module">
+      import { runAll } from './telemetry.test.js';
+
+      const output = document.getElementById('output');
+      const results = runAll();
+      const passed = results.filter((r) => r.ok).length;
+      const failed = results.filter((r) => !r.ok).length;
+
+      const html = results
+        .map((r) => {
+          const cls = r.ok ? 'ok' : 'fail';
+          const mark = r.ok ? '✓' : '✗';
+          const err = r.error ? `<div class="error">${r.error}</div>` : '';
+          return `<div class="test ${cls}">${mark} ${r.name}${err}</div>`;
+        })
+        .join('');
+
+      const summaryCls = failed === 0 ? 'pass' : 'fail';
+      const summary = `<div class="summary ${summaryCls}">${passed} passed, ${failed} failed</div>`;
+
+      output.innerHTML = html + summary;
+
+      // Expose aux outils d'inspection pour le verifier externe.
+      window.__testResults = results;
+    </script>
+  </body>
+</html>

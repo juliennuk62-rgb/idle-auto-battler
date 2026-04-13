@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Idle Auto-Battler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="src/ui/cockpit.css" />
+  </head>
+  <body>
+    <div class="cockpit">
+      <header class="cockpit-topbar" aria-label="Ressources et progression"></header>
+      <aside class="cockpit-leftcol" aria-label="Équipe active"></aside>
+      <main class="cockpit-center">
+        <div id="game"></div>
+      </main>
+      <aside class="cockpit-rightcol" aria-label="Ennemis et vagues"></aside>
+      <footer class="cockpit-bottombar" aria-label="Actions et historique"></footer>
+    </div>
+
+    <!-- Firebase SDK (compat) — chargé avant Phaser pour que l'auth soit prête -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
