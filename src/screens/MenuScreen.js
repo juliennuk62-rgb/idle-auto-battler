@@ -9,6 +9,7 @@ import { StatsModal } from '../ui/StatsModal.js';
 import { TalentModal } from '../ui/TalentModal.js';
 import { TelemetrySystem } from '../systems/TelemetrySystem.js';
 import { MissionSystem } from '../systems/MissionSystem.js';
+import { OnboardingSystem } from '../systems/OnboardingSystem.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
 
 export class MenuScreen {
@@ -92,6 +93,34 @@ export class MenuScreen {
     // Bouton guide
     attachGuideButton(this.el.querySelector('#menu-guide'), 'menu');
 
+    // Onboarding — grise les boutons non débloqués
+    const unlocked = OnboardingSystem.getUnlockedButtons();
+    if (unlocked) {
+      this.el.querySelectorAll('[data-nav]').forEach(btn => {
+        const nav = btn.dataset.nav;
+        if (!unlocked.includes(nav)) {
+          btn.classList.add('menu-btn-locked');
+          btn.setAttribute('disabled', 'true');
+          // Ajoute un cadenas
+          const lock = document.createElement('span');
+          lock.className = 'menu-btn-lock';
+          lock.textContent = '🔒';
+          btn.appendChild(lock);
+        }
+      });
+
+      // Flèche vers Aventure si c'est le seul bouton
+      if (unlocked.length === 1) {
+        const aventureBtn = this.el.querySelector('[data-nav="map"]');
+        if (aventureBtn) {
+          const arrow = document.createElement('span');
+          arrow.className = 'menu-btn-arrow';
+          arrow.textContent = '👈 Commencez ici !';
+          aventureBtn.appendChild(arrow);
+        }
+      }
+    }
+
     // User info
     const user = AuthSystem.getUser();
     if (user) {
@@ -111,6 +140,7 @@ export class MenuScreen {
     // Navigation — les modales s'ouvrent directement depuis le menu.
     this.el.querySelectorAll('[data-nav]').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (btn.classList.contains('menu-btn-locked')) return; // bloqué par onboarding
         const target = btn.dataset.nav;
         switch (target) {
           case 'map':
@@ -159,6 +189,37 @@ export class MenuScreen {
 
   show() {
     document.body.append(this.el);
+
+    // Popup de bienvenue au premier lancement
+    if (OnboardingSystem.needsWelcome()) {
+      this._showWelcome();
+    }
+  }
+
+  _showWelcome() {
+    const popup = document.createElement('div');
+    popup.className = 'onboard-welcome';
+    popup.innerHTML = `
+      <div class="onboard-welcome-card">
+        <div class="onboard-welcome-title">Bienvenue, Aventurier !</div>
+        <div class="onboard-welcome-text">
+          Le monde est menacé par des hordes de monstres. Constituez votre équipe,
+          combattez à travers 6 biomes, et devenez le héros ultime !
+        </div>
+        <div class="onboard-welcome-steps">
+          <div class="onboard-step">1. Lancez l'<strong>Aventure</strong> pour combattre</div>
+          <div class="onboard-step">2. Gagnez de l'<strong>or</strong> et des <strong>gemmes</strong></div>
+          <div class="onboard-step">3. Invoquez des <strong>héros</strong> et équipez votre équipe</div>
+        </div>
+        <button class="onboard-welcome-btn" id="onboard-ok">C'est parti !</button>
+      </div>
+    `;
+    this.el.appendChild(popup);
+
+    popup.querySelector('#onboard-ok').addEventListener('click', () => {
+      OnboardingSystem.markWelcomed();
+      popup.remove();
+    });
   }
 
   hide() {

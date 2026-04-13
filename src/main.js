@@ -8,6 +8,7 @@ import { AuthSystem } from './systems/AuthSystem.js';
 import { WorldSystem } from './systems/WorldSystem.js';
 // DungeonSystem retiré — remplacé par DungeonExploreScreen + DungeonCombatScene
 import { TalentSystem } from './systems/TalentSystem.js';
+import { OnboardingSystem } from './systems/OnboardingSystem.js';
 import { LoginScreen } from './ui/LoginScreen.js';
 import { MenuScreen } from './screens/MenuScreen.js';
 import { MapScreen } from './screens/MapScreen.js';
@@ -73,6 +74,9 @@ async function boot() {
     }
     if (cloudData.talents) {
       TalentSystem.restore(cloudData.talents);
+    }
+    if (cloudData.onboarding) {
+      OnboardingSystem.restore(cloudData.onboarding);
     }
     if (cloudData.dungeonRun) {
       localStorage.setItem('idle_autobattler_dungeon_run', JSON.stringify(cloudData.dungeonRun));
@@ -233,7 +237,10 @@ function onCombatEnd(result) {
   // Mode biome normal → retour carte.
   if (result) {
     WorldSystem.completeRun(result.biomeId, result.waveReached, result.bossBeaten);
-    if (result.victory) MissionSystem.track('biome_wins', 1);
+    if (result.victory) {
+      MissionSystem.track('biome_wins', 1);
+      OnboardingSystem.recordVictory();
+    }
   }
   navigateTo('map');
 }
@@ -338,6 +345,7 @@ async function cloudSaveAll() {
       daily: DailySystem.serialize(),
       missions: MissionSystem.serialize(),
       talents: TalentSystem.serialize(),
+      onboarding: OnboardingSystem.serialize(),
       dungeonRun: JSON.parse(localStorage.getItem('idle_autobattler_dungeon_run') || 'null'),
     };
     await AuthSystem.cloudSave(data);
