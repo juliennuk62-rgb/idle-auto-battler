@@ -5,6 +5,7 @@
 import { attachGuideButton } from '../ui/GuideModal.js';
 import { ResourceSystem } from '../systems/ResourceSystem.js';
 import { MissionSystem } from '../systems/MissionSystem.js';
+import { InventoryModal } from '../ui/InventoryModal.js';
 
 const ROOMS = [
   { id: 0, name: 'Salle 1', desc: 'Éclaireurs', icon: '👺', x: 15, y: 15, mobCount: 3, atkMult: 1.0, hpMult: 1.0, goldReward: 200, gemsReward: 0 },
@@ -155,6 +156,12 @@ export class DungeonExploreScreen {
       });
     });
 
+    // Inventaire entre les salles
+    this.el.querySelector('#dex-inventory')?.addEventListener('click', () => {
+      if (!this._invModal) this._invModal = new InventoryModal({ game: null });
+      this._invModal.modal.open();
+    });
+
     this.el.querySelector('#dex-victory-back')?.addEventListener('click', () => {
       this._clearSave();
       this.onNavigate('menu');
@@ -250,6 +257,7 @@ export class DungeonExploreScreen {
             <span class="dex-choice-desc">+15% ATK temporaire</span>
           </button>
         </div>
+        <button class="dex-inventory-btn" id="dex-inventory">🎒 Gérer l'inventaire</button>
       </div>
     `;
   }

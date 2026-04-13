@@ -4,6 +4,7 @@
 
 import { WorldSystem } from '../systems/WorldSystem.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
+import { InventoryModal } from '../ui/InventoryModal.js';
 
 // Positions des zones sur la carte (en % de l'image, responsive).
 // À ajuster une fois que l'image réelle est générée.
@@ -33,6 +34,7 @@ export class MapScreen {
       <div class="map-header">
         <button class="map-back-btn" id="map-back">← Menu</button>
         <span class="map-title">CARTE DU MONDE</span>
+        <button class="map-inventory-btn" id="map-inventory">🎒 Inventaire</button>
         <div id="map-guide"></div>
       </div>
       <div class="map-container" id="map-container">
@@ -44,6 +46,11 @@ export class MapScreen {
 
     this.el.querySelector('#map-back').addEventListener('click', () => {
       this.onNavigate('menu');
+    });
+
+    this.el.querySelector('#map-inventory').addEventListener('click', () => {
+      if (!this._invModal) this._invModal = new InventoryModal({ game: null });
+      this._invModal.modal.open();
     });
 
     attachGuideButton(this.el.querySelector('#map-guide'), 'map');

@@ -19,14 +19,22 @@ export class DungeonCombatScene extends Phaser.Scene {
   }
 
   preload() {
-    // Réutilise les sprites déjà chargés par CombatScene (s'ils existent)
-    if (!this.textures.exists('warrior')) {
-      this.load.image('warrior', 'assets/sprites/allies/warrior.png');
-      this.load.image('archer', 'assets/sprites/allies/archer.png');
-      this.load.image('mage', 'assets/sprites/allies/mage.png');
-      this.load.image('healer', 'assets/sprites/allies/healer.png');
-      this.load.image('gobelin', 'assets/sprites/monsters/gobelin.png');
-      this.load.image('loup', 'assets/sprites/monsters/loup.png');
+    // Charge tous les sprites nécessaires au donjon
+    const sprites = {
+      // Alliés
+      warrior: 'assets/sprites/allies/warrior.png',
+      archer: 'assets/sprites/allies/archer.png',
+      mage: 'assets/sprites/allies/mage.png',
+      healer: 'assets/sprites/allies/healer.png',
+      // Monstres forêt
+      gobelin: 'assets/sprites/monsters/gobelin.png',
+      loup: 'assets/sprites/monsters/loup.png',
+      araignee: 'assets/sprites/monsters/araignee.png',
+      sanglier: 'assets/sprites/monsters/sanglier.png',
+      boss_roi_gobelin: 'assets/sprites/monsters/boss_roi_gobelin.png',
+    };
+    for (const [key, path] of Object.entries(sprites)) {
+      if (!this.textures.exists(key)) this.load.image(key, path);
     }
   }
 
@@ -189,7 +197,7 @@ export class DungeonCombatScene extends Phaser.Scene {
         ability: { id: 'bite', name: 'Morsure', paCost: 3, minRange: 1, maxRange: 1,
           aoeShape: 'single', targetType: 'enemy', damage: { base: 0, scaling: 1.2 },
           needsLOS: false, cooldown: 0, maxUsesPerTurn: -1, icon: '🐺' } },
-      { name: 'Araignée', sprite: 'gobelin', baseHp: 70, baseAtk: 10, pm: 3, initiative: 20,
+      { name: 'Araignée', sprite: 'araignee', baseHp: 70, baseAtk: 10, pm: 3, initiative: 20,
         ability: { id: 'web', name: 'Toile', paCost: 3, minRange: 1, maxRange: 2,
           aoeShape: 'single', targetType: 'enemy', damage: { base: 0, scaling: 0.6 },
           statusEffect: { id: 'slow', name: 'Ralenti', duration: 1, effect: { pmModifier: -2, isDebuff: true } },
@@ -197,7 +205,7 @@ export class DungeonCombatScene extends Phaser.Scene {
     ];
 
     const BOSS_TEMPLATE = {
-      name: 'Roi Gobelin', sprite: 'gobelin', baseHp: 300, baseAtk: 20, pm: 3, initiative: 25,
+      name: 'Roi Gobelin', sprite: 'boss_roi_gobelin', baseHp: 300, baseAtk: 20, pm: 3, initiative: 25,
       pa: 8, isBoss: true,
       abilities: [
         { id: 'royal_strike', name: 'Frappe royale', paCost: 4, minRange: 1, maxRange: 1,
