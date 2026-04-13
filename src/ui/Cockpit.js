@@ -67,6 +67,17 @@ export class Cockpit {
   _mountTopBar() {
     if (!this.topBar) return;
 
+    const backBtn = document.createElement('button');
+    backBtn.className = 'topbar-back-btn';
+    backBtn.textContent = '← Carte';
+    backBtn.addEventListener('click', () => {
+      if (confirm('Quitter le combat ? Vous reviendrez à la carte.')) {
+        const onEnd = window.__onCombatEnd;
+        if (onEnd) onEnd({ victory: false, quit: true });
+      }
+    });
+    this.topBar.append(backBtn);
+
     const title = document.createElement('div');
     title.className = 'topbar-title';
     title.textContent = 'IDLE · AUTO-BATTLER';

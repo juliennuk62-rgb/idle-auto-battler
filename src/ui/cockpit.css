@@ -1279,6 +1279,20 @@ li {
 
 /* ── Top bar — placeholders pour les sections à venir ──── */
 
+.topbar-back-btn {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(239,68,68,0.4);
+  background: rgba(40,15,15,0.7);
+  color: #f87171;
+  cursor: pointer;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.topbar-back-btn:hover { background: rgba(60,20,20,0.9); border-color: #ef4444; }
+
 .topbar-title {
   font-family: var(--font-pixel);
   font-size: 12px;
@@ -2173,6 +2187,47 @@ li {
   .menu-buttons { grid-template-columns: 1fr; }
 }
 
+/* ── Responsive global ───────────────────────────── */
+
+@media (max-height: 800px) {
+  /* Screens avec container centré */
+  .summon-container, .chest-container, .mission-container,
+  .collection-container, .team-container, .dex-container { padding: 12px; gap: 10px; }
+
+  /* Invocation */
+  .summon-banner { padding: 16px 12px; }
+  .summon-featured-name { font-size: 16px; }
+  .summon-btn { padding: 12px 10px; }
+
+  /* Coffres */
+  .chest-grid { gap: 8px; }
+  .chest-card { padding: 10px 6px; }
+  .chest-card-icon { font-size: 24px; }
+
+  /* Collection */
+  .collection-grid { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .collection-card { padding: 8px 4px; min-height: 60px; }
+
+  /* Donjon explore */
+  .dex-map { aspect-ratio: 3 / 2; }
+  .dex-choice-options { flex-wrap: wrap; }
+
+  /* Missions */
+  .mission-item { padding: 8px 10px; }
+
+  /* Map */
+  .map-container { padding: 10px; }
+}
+
+@media (max-height: 650px) {
+  .summon-pity { display: none; }
+  .summon-banner { padding: 10px; }
+  .summon-featured-lore { display: none; }
+  .chest-card-desc { display: none; }
+  .collection-milestones { display: none; }
+  .dex-progress-bar { display: none; }
+}
+
 /* ── Scrollbars pixel-cohérentes ─────────────────────────── */
 
 ::-webkit-scrollbar {
@@ -2595,6 +2650,96 @@ li {
   20% { opacity: 0; }
   30% { opacity: 0.8; }
   40% { opacity: 0; }
+}
+
+/* ── Récap multi-pull ─────────────────────────────── */
+
+.summon-recap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  z-index: 2;
+}
+
+.summon-recap-title {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(251,191,36,0.4);
+  letter-spacing: 2px;
+}
+
+.summon-recap-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.summon-recap-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  background: rgba(20,20,40,0.9);
+  border: 2px solid #444;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.summon-recap-rarity {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.summon-recap-name {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.summon-recap-class {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-transform: capitalize;
+}
+
+.summon-recap-new {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--gold);
+}
+
+.summon-recap-summary {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.summon-recap-btn {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 10px 32px;
+  background: linear-gradient(180deg, var(--gold) 0%, #d4a017 100%);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.summon-recap-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(251,191,36,0.4);
 }
 
 .summon-ur-lightning {

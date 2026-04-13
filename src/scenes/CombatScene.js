@@ -602,11 +602,12 @@ export class CombatScene extends Phaser.Scene {
     // que le joueur puisse les distinguer visuellement sans chevauchement.
     //
     //   Back                      Front
-    //     Archer (100,365)           Warrior1 (260,385)
-    //       Mage (130,400)
-    //         Healer (110,435)         Warrior2 (290,430)
+    // Formation : Guerriers DEVANT → Archer MILIEU → Mage MILIEU-ARR → Healer ARRIÈRE
     //
-    const w1 = new Fighter(this, 260, 385, {
+    //  Healer (60,435)  Mage (100,400)  Archer (160,370)  Guerrier1 (260,385)
+    //                                                       Guerrier2 (280,430)
+    //
+    const w1 = new Fighter(this, 260, 375, {
       ...BALANCE.warrior,
       name: 'Guerrier 1',
       grade: startGrade,
@@ -615,7 +616,7 @@ export class CombatScene extends Phaser.Scene {
       color: 0x3b82f6,
       facing: 1,
     });
-    const w2 = new Fighter(this, 290, 430, {
+    const w2 = new Fighter(this, 280, 425, {
       ...BALANCE.warrior,
       name: 'Guerrier 2',
       spriteKey: 'warrior',
@@ -623,7 +624,7 @@ export class CombatScene extends Phaser.Scene {
       color: 0x3b82f6,
       facing: 1,
     });
-    const archer = new Fighter(this, 100, 365, {
+    const archer = new Fighter(this, 160, 370, {
       ...BALANCE.archer,
       name: 'Archer',
       spriteKey: 'archer',
@@ -631,7 +632,7 @@ export class CombatScene extends Phaser.Scene {
       color: 0xa855f7,
       facing: 1,
     });
-    const mage = new Fighter(this, 130, 400, {
+    const mage = new Fighter(this, 100, 400, {
       ...BALANCE.mage,
       name: 'Mage',
       spriteKey: 'mage',
@@ -639,7 +640,7 @@ export class CombatScene extends Phaser.Scene {
       color: 0x60a5fa,
       facing: 1,
     });
-    const healer = new Fighter(this, 110, 435, {
+    const healer = new Fighter(this, 60, 435, {
       ...BALANCE.healer,
       name: 'Soigneur',
       spriteKey: 'healer',

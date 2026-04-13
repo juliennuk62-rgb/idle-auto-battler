@@ -95,6 +95,7 @@ export class SummonScreen {
   }
 
   _playAnimation(results) {
+    this._animSkipTimeout = null;
     const overlay = this.el.querySelector('#summon-anim');
     overlay.style.display = 'flex';
     this._animateResult(results, 0, overlay);
@@ -102,19 +103,20 @@ export class SummonScreen {
 
   _animateResult(results, index, overlay) {
     if (index >= results.length) {
-      // Fin de l'animation → refresh l'écran.
-      // _render() recrée le HTML et rebind les events automatiquement.
-      overlay.style.display = 'none';
-      this._render();
+      // Fin — afficher le récap si multi-pull
+      if (results.length > 1) {
+        this._showMultiRecap(results, overlay);
+      } else {
+        overlay.style.display = 'none';
+        this._render();
+      }
       return;
     }
 
     const r = results[index];
     const rarityInfo = HERO_RARITIES[r.rarity];
-    const isLast = index === results.length - 1;
-    const duration = r.rarity === 'UR' ? 3000 : r.rarity === 'SSR' ? 2500 : r.rarity === 'SR' ? 1500 : 1000;
+    const duration = r.rarity === 'UR' ? 2500 : r.rarity === 'SSR' ? 2000 : r.rarity === 'SR' ? 1200 : 800;
 
-    // Étoile filante + reveal.
     overlay.innerHTML = `
       <div class="summon-stars-bg"></div>
       <div class="summon-meteor" style="--meteor-color:${rarityInfo.color};"></div>
@@ -125,22 +127,58 @@ export class SummonScreen {
           <div class="summon-reveal-name">${r.hero.name}</div>
           <div class="summon-reveal-class">${r.hero.class}</div>
           ${r.isNew ? '<div class="summon-reveal-new">NOUVEAU !</div>' : '<div class="summon-reveal-dupe">Doublon</div>'}
-          ${(r.hero.passifs || []).map(p => `<div class="summon-reveal-passif">${p.name} — ${p.desc}</div>`).join('')}
         </div>
       </div>
       <div class="summon-reveal-counter">${index + 1} / ${results.length}</div>
     `;
 
-    // Click ou timeout → prochain résultat.
+    // Avancer : clic OU timeout (mais jamais les deux)
+    let advanced = false;
     const next = () => {
-      overlay.removeEventListener('click', next);
+      if (advanced) return; // empêche le double appel
+      advanced = true;
+      if (this._animSkipTimeout) clearTimeout(this._animSkipTimeout);
       this._animateResult(results, index + 1, overlay);
     };
+
     setTimeout(() => {
       overlay.addEventListener('click', next, { once: true });
-      // Auto-advance après un délai supplémentaire si pas de clic.
-      if (!isLast) setTimeout(next, 2000);
-    }, duration * 0.6);
+      // Auto-advance après 2s (annulé si clic)
+      this._animSkipTimeout = setTimeout(next, 2000);
+    }, duration * 0.5);
+  }
+
+  _showMultiRecap(results, overlay) {
+    const newOnes = results.filter(r => r.isNew);
+    const dupes = results.filter(r => !r.isNew);
+
+    overlay.innerHTML = `
+      <div class="summon-recap">
+        <div class="summon-recap-title">RÉCAP INVOCATION ×${results.length}</div>
+        <div class="summon-recap-grid">
+          ${results.map(r => {
+            const ri = HERO_RARITIES[r.rarity];
+            return `
+              <div class="summon-recap-card" style="border-color:${ri.color}">
+                <div class="summon-recap-rarity" style="color:${ri.color}">${ri.name}</div>
+                <div class="summon-recap-name">${r.hero.name}</div>
+                <div class="summon-recap-class">${r.hero.class}</div>
+                ${r.isNew ? '<div class="summon-recap-new">NEW</div>' : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div class="summon-recap-summary">
+          ${newOnes.length} nouveau${newOnes.length > 1 ? 'x' : ''} · ${dupes.length} doublon${dupes.length > 1 ? 's' : ''}
+        </div>
+        <button class="summon-recap-btn" id="summon-recap-ok">OK</button>
+      </div>
+    `;
+
+    overlay.querySelector('#summon-recap-ok').addEventListener('click', () => {
+      overlay.style.display = 'none';
+      this._render();
+    });
   }
 
   // _rebindEvents supprimé — _render() recrée le HTML et les events à chaque fois.
