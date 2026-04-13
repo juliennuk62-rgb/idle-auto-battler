@@ -44,10 +44,10 @@ export class InventoryModal {
     // Permet d'équiper/déséquiper depuis le menu
     if (!this._menuFighters) {
       this._menuFighters = [
-        { id: 'u1', name: 'Guerrier', class: 'warrior', _recomputeStats: () => {} },
-        { id: 'u2', name: 'Archer',   class: 'archer',  _recomputeStats: () => {} },
-        { id: 'u3', name: 'Mage',     class: 'mage',    _recomputeStats: () => {} },
-        { id: 'u4', name: 'Healer',   class: 'healer',  _recomputeStats: () => {} },
+        { id: 'u1', name: 'Guerrier', class: 'warrior', level: 1, grade: 1, _recomputeStats: () => {} },
+        { id: 'u2', name: 'Archer',   class: 'archer',  level: 1, grade: 1, _recomputeStats: () => {} },
+        { id: 'u3', name: 'Mage',     class: 'mage',    level: 1, grade: 1, _recomputeStats: () => {} },
+        { id: 'u4', name: 'Healer',   class: 'healer',  level: 1, grade: 1, _recomputeStats: () => {} },
       ];
     }
     return this._menuFighters;

@@ -10,7 +10,7 @@ export class ItemSystemImpl {
   constructor() {
     this.inventory = []; // Item instances
     this.maxSize = BALANCE.loot.inventory_size;
-    this.equipmentLocked = true; // Verrouillé pendant le combat, libre en phase preparation.
+    this.equipmentLocked = false; // Libre par défaut, verrouillé pendant le combat actif.
     this._listeners = [];
     this._load();
   }
