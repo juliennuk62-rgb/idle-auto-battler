@@ -10,7 +10,10 @@
     "visual-overhaul": "node scripts/visual-overhaul.js",
     "apply-patches": "node scripts/apply-patches.js",
     "patch-fixer": "node scripts/patch-fixer.js",
-    "apply-fixed": "node scripts/apply-fixed.js"
+    "apply-fixed": "node scripts/apply-fixed.js",
+    "content-atelier": "node scripts/content-atelier.js",
+    "content-finisher": "node scripts/content-finisher.js",
+    "validate-content": "node scripts/validate-content.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.1"
