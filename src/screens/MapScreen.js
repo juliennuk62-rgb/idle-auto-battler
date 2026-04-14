@@ -35,6 +35,7 @@ export class MapScreen {
         <button class="map-back-btn" id="map-back">← Menu</button>
         <span class="map-title">CARTE DU MONDE</span>
         <button class="map-inventory-btn" id="map-inventory">🎒 Inventaire</button>
+        <button class="map-inventory-btn" id="map-infinite" style="border-color:rgba(249,115,22,0.4);color:#f97316;">∞ Mode Infini</button>
         <div id="map-guide"></div>
       </div>
       <div class="map-container" id="map-container">
@@ -51,6 +52,10 @@ export class MapScreen {
     this.el.querySelector('#map-inventory').addEventListener('click', () => {
       if (!this._invModal) this._invModal = new InventoryModal({ game: null });
       this._invModal.modal.open();
+    });
+
+    this.el.querySelector('#map-infinite').addEventListener('click', () => {
+      this.onNavigate('combat', { biomeId: 'infinite' });
     });
 
     attachGuideButton(this.el.querySelector('#map-guide'), 'map');

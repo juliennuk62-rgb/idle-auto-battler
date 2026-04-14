@@ -78,6 +78,11 @@ export class MenuScreen {
             <span class="menu-btn-label">PRESTIGE</span>
             <span class="menu-btn-desc">Bonus permanents</span>
           </button>
+          <button class="menu-btn" data-nav="achievements">
+            <span class="menu-btn-icon">🏆</span>
+            <span class="menu-btn-label">ACHIEVEMENTS</span>
+            <span class="menu-btn-desc">Défis et récompenses</span>
+          </button>
           <button class="menu-btn" data-nav="stats">
             <span class="menu-btn-icon">📊</span>
             <span class="menu-btn-label">STATISTIQUES</span>
@@ -175,6 +180,9 @@ export class MenuScreen {
           case 'prestige':
             if (!this._prestigeModal) this._prestigeModal = new PrestigeModal({ game: null });
             this._prestigeModal.modal.open();
+            break;
+          case 'achievements':
+            this.onNavigate('achievements');
             break;
           case 'stats':
             if (!this._statsModal) this._statsModal = new StatsModal({ telemetry: TelemetrySystem });

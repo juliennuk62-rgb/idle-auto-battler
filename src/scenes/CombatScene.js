@@ -13,6 +13,7 @@ import { SaveSystem } from '../systems/SaveSystem.js';
 import { PrestigeSystem } from '../systems/PrestigeSystem.js';
 import { ItemSystem } from '../systems/ItemSystem.js';
 import { GachaSystem } from '../systems/GachaSystem.js';
+import { AchievementSystem } from '../systems/AchievementSystem.js';
 
 // Scène principale : combat auto avec classes, grades, vagues, biomes,
 // économie et sauvegarde. Charge depuis localStorage si une save existe.
@@ -161,13 +162,17 @@ export class CombatScene extends Phaser.Scene {
 
     // Si un biome est explicitement sélectionné depuis la carte du monde,
     // on calcule la wave de départ et de fin de ce biome.
-    if (this._selectedBiomeId) {
+    if (this._selectedBiomeId === 'infinite') {
+      // Mode infini : commence à wave 1, pas de limite, les biomes bouclent
+      startWave = 1;
+      this._maxWavesInBiome = 999999;
+      this._isInfiniteMode = true;
+    } else if (this._selectedBiomeId) {
       const biomeIdx = BIOMES.findIndex(b => b.id === this._selectedBiomeId);
       if (biomeIdx >= 0) {
-        const biomeStartWave = biomeIdx * 10 + 1; // forêt=1, grottes=11, ruines=21...
+        const biomeStartWave = biomeIdx * 10 + 1;
         startWave = biomeStartWave;
-        // maxWavesInBiome = wave de FIN du biome (pas le nombre de waves)
-        this._maxWavesInBiome = biomeStartWave + 9; // forêt=10, grottes=20, ruines=30...
+        this._maxWavesInBiome = biomeStartWave + 9;
       }
     }
 
@@ -361,15 +366,21 @@ export class CombatScene extends Phaser.Scene {
     this._combatEnded = true;
     this.saveGame();
 
+    const waveReached = this.combat?.currentWave || 1;
     const result = {
       biomeId: this.currentBiomeId,
-      waveReached: this.combat?.currentWave || 1,
-      bossBeaten: victory && (this.combat?.currentWave || 0) >= this._maxWavesInBiome,
+      waveReached,
+      bossBeaten: victory && waveReached >= this._maxWavesInBiome,
       victory,
-      mode: this._isDungeon ? 'dungeon' : 'biome',
+      mode: this._isDungeon ? 'dungeon' : (this._isInfiniteMode ? 'infinite' : 'biome'),
       floor: this._dungeonFloorData?.floor || 0,
       goldFromFloor: this.combat?._biomeStats?.gold || 0,
     };
+
+    // Achievement : mode infini
+    if (this._isInfiniteMode) {
+      AchievementSystem.update('infinite_wave', waveReached);
+    }
 
     // Pause tous les timers pour figer le combat.
     for (const f of this.combat.teamA) { if (f.attackTimer) f.attackTimer.paused = true; }

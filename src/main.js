@@ -9,6 +9,8 @@ import { WorldSystem } from './systems/WorldSystem.js';
 // DungeonSystem retiré — remplacé par DungeonExploreScreen + DungeonCombatScene
 import { TalentSystem } from './systems/TalentSystem.js';
 import { OnboardingSystem } from './systems/OnboardingSystem.js';
+import { AchievementSystem } from './systems/AchievementSystem.js';
+import { AchievementScreen } from './screens/AchievementScreen.js';
 import { LoginScreen } from './ui/LoginScreen.js';
 import { MenuScreen } from './screens/MenuScreen.js';
 import { MapScreen } from './screens/MapScreen.js';
@@ -78,6 +80,9 @@ async function boot() {
     if (cloudData.onboarding) {
       OnboardingSystem.restore(cloudData.onboarding);
     }
+    if (cloudData.achievements) {
+      AchievementSystem.restore(cloudData.achievements);
+    }
     if (cloudData.dungeonRun) {
       localStorage.setItem('idle_autobattler_dungeon_run', JSON.stringify(cloudData.dungeonRun));
     }
@@ -104,6 +109,21 @@ async function boot() {
 
   // Console admin (F9) — accessible partout
   new DevConsole();
+
+  // Toast quand un achievement est débloqué
+  AchievementSystem.onUnlock((ach) => {
+    const toast = document.createElement('div');
+    toast.className = 'achiev-toast';
+    toast.innerHTML = `
+      <span class="achiev-toast-icon">${ach.icon}</span>
+      <div>
+        <div class="achiev-toast-text">ACHIEVEMENT DÉBLOQUÉ</div>
+        <div class="achiev-toast-name">${ach.name} — ${ach.desc}</div>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  });
 
   // Démarre au menu principal.
   navigateTo('menu');
@@ -183,6 +203,11 @@ function navigateTo(screen, data) {
       currentScreen.show();
       break;
 
+    case 'achievements':
+      currentScreen = new AchievementScreen((target) => navigateTo(target));
+      currentScreen.show();
+      break;
+
     case 'inventory':
     case 'prestige':
     case 'stats':
@@ -245,6 +270,9 @@ function onCombatEnd(result) {
       MissionSystem.track('biome_wins', 1);
       OnboardingSystem.recordVictory();
     }
+    // Achievement tracking
+    if (result.waveReached) AchievementSystem.update('max_wave', result.waveReached);
+    if (result.bossBeaten) AchievementSystem.increment('boss_kills');
   }
   navigateTo('map');
 }
@@ -350,6 +378,7 @@ async function cloudSaveAll() {
       missions: MissionSystem.serialize(),
       talents: TalentSystem.serialize(),
       onboarding: OnboardingSystem.serialize(),
+      achievements: AchievementSystem.serialize(),
       dungeonRun: JSON.parse(localStorage.getItem('idle_autobattler_dungeon_run') || 'null'),
     };
     await AuthSystem.cloudSave(data);

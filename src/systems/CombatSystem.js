@@ -16,6 +16,7 @@
 import { TelemetrySystem } from './TelemetrySystem.js';
 import { MissionSystem } from './MissionSystem.js';
 import { SynergySystem } from './SynergySystem.js';
+import { AchievementSystem } from './AchievementSystem.js';
 import { ResourceSystem } from './ResourceSystem.js';
 import { PrestigeSystem } from './PrestigeSystem.js';
 import { computeXpReward } from './Progression.js';
@@ -432,10 +433,14 @@ export class CombatSystem {
       this.scene.comboCounter.registerKill();
     }
 
-    // Mission tracking — kills + boss_kills + gold.
+    // Mission + Achievement tracking — kills + boss_kills + gold.
     if (wasEnemy) {
       MissionSystem.track('kills', 1);
-      if (target.isBoss) MissionSystem.track('boss_kills', 1);
+      AchievementSystem.increment('kills');
+      if (target.isBoss) {
+        MissionSystem.track('boss_kills', 1);
+        AchievementSystem.increment('boss_kills');
+      }
     }
 
     // Track des morts alliées pour le récap biome.
@@ -454,6 +459,7 @@ export class CombatSystem {
       ResourceSystem.addGold(finalGold);
       this.combatGoldEarned += finalGold;
       MissionSystem.track('gold_earned', finalGold);
+      AchievementSystem.increment('total_gold', finalGold);
       if (reward.gems > 0) {
         ResourceSystem.addGems(reward.gems);
         this.combatGemsEarned += reward.gems;
