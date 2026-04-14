@@ -148,6 +148,29 @@ export class Fighter {
     } else {
       this.container.add([this.body, this.label, this.hpBarBg, this.hpBarFill]);
     }
+
+    // Idle breathing — légère oscillation Y du body uniquement (pas du container)
+    // pour ne pas désynchroniser les barres HP
+    this._startIdleAnim();
+  }
+
+  _startIdleAnim() {
+    if (!this.body) return;
+    // Phase aléatoire pour que toutes les unités ne respirent pas en sync
+    const phase = Math.random() * Math.PI * 2;
+    const baseY = this.body.y;
+    this._idleTween = this.scene.tweens.addCounter({
+      from: 0, to: Math.PI * 2,
+      duration: 2200 + Math.random() * 600, // 2.2-2.8s
+      repeat: -1,
+      onUpdate: (tween) => {
+        if (!this.body || !this.isAlive) return;
+        // Skip si l'unité attaque ou se déplace
+        if (this._isAttacking || this._isWalking) return;
+        const v = tween.getValue();
+        this.body.y = baseY + Math.sin(v + phase) * 1.5;
+      },
+    });
   }
 
   _labelText() {
@@ -227,15 +250,23 @@ export class Fighter {
   playAttackTween() {
     if (!this.isAlive) return;
 
-    // Animation d'attaque en 3 phases — utilise la position COURANTE
-    // (pas startX) pour que les unités en mouvement TD ne soient pas
-    // téléportées à leur position d'origine après chaque coup.
+    // Animation d'attaque en 5 phases : anticipation → recul → frappe → retour → recoil
     const dir = this.facing;
     const rest = this.currentScale;
-    const cx = this.container.x; // position courante, pas startX
+    const cx = this.container.x;
+    this._isAttacking = true;
+
     this.scene.tweens.chain({
       targets: this.container,
       tweens: [
+        // Phase 0 : anticipation (wind-up subtle, recule un peu)
+        {
+          x: cx - 2 * dir,
+          scaleX: rest * 0.95,
+          duration: 50,
+          ease: 'Sine.In',
+        },
+        // Phase 1 : recul de préparation (squash)
         {
           x: cx - 6 * dir,
           scaleX: rest * 0.9,
@@ -243,6 +274,7 @@ export class Fighter {
           duration: 60,
           ease: 'Quad.Out',
         },
+        // Phase 2 : frappe rapide (stretch + lunge)
         {
           x: cx + 16 * dir,
           scaleX: rest * 1.1,
@@ -250,12 +282,22 @@ export class Fighter {
           duration: 70,
           ease: 'Back.Out',
         },
+        // Phase 3 : retour à la position de repos
         {
           x: cx,
           scaleX: rest,
           scaleY: rest,
           duration: 90,
           ease: 'Quad.Out',
+        },
+        // Phase 4 : recoil/respiration finale (micro-bounce)
+        {
+          scaleX: rest * 1.04,
+          scaleY: rest * 0.96,
+          duration: 60,
+          yoyo: true,
+          ease: 'Sine.InOut',
+          onComplete: () => { this._isAttacking = false; },
         },
       ],
     });
@@ -603,7 +645,8 @@ export class Fighter {
     const dist = Math.abs(dx);
 
     if (dist <= this.attackRange) {
-      // À portée → ENGAGEMENT.
+      // À portée → ENGAGEMENT. Stop walking.
+      this._stopWalking();
       this.engaged = true;
       this.engagedWith = target;
       // L'autre s'engage aussi si c'est un mêlée.
@@ -617,6 +660,19 @@ export class Fighter {
       // Trop loin → marche vers la cible.
       const direction = dx > 0 ? 1 : -1;
       this.container.x += direction * this.moveSpeed * (delta / 1000);
+      // Bobbing : oscillation Y du body pendant la marche
+      this._isWalking = true;
+      this._walkPhase = (this._walkPhase || 0) + delta * 0.012;
+      if (this.body) {
+        this.body.y = Math.sin(this._walkPhase) * 2.5;
+      }
+    }
+  }
+
+  _stopWalking() {
+    if (this._isWalking) {
+      this._isWalking = false;
+      if (this.body) this.body.y = 0;
     }
   }
 
@@ -663,11 +719,46 @@ export class Fighter {
     if (this.ultimateCharge >= this.ultimateMax) {
       this.ultimateReady = true;
     }
+    this._updateUltimateGlow();
+  }
+
+  _updateUltimateGlow() {
+    if (!this.container || this.ultimateMax <= 0) return;
+    const ratio = this.ultimateCharge / this.ultimateMax;
+    if (ratio < 0.3) {
+      // Pas assez chargé pour afficher l'aura
+      if (this._ultGlow) { this._ultGlow.destroy(); this._ultGlow = null; }
+      return;
+    }
+    // Crée l'aura si pas encore là
+    if (!this._ultGlow) {
+      this._ultGlow = this.scene.add.circle(0, 5, 28, 0xfbbf24, 0.15);
+      this._ultGlow.setDepth(-1);
+      this.container.addAt(this._ultGlow, 0); // derrière le sprite
+    }
+    // Intensité proportionnelle à la charge
+    this._ultGlow.setAlpha(0.1 + ratio * 0.35);
+    this._ultGlow.setScale(0.8 + ratio * 0.4);
+
+    // Si plein → pulse continu
+    if (this.ultimateReady && !this._ultGlowPulse) {
+      this._ultGlowPulse = this.scene.tweens.add({
+        targets: this._ultGlow,
+        scale: 1.4,
+        alpha: 0.55,
+        duration: 600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.InOut',
+      });
+    }
   }
 
   resetUltimate() {
     this.ultimateCharge = 0;
     this.ultimateReady = false;
+    if (this._ultGlowPulse) { this._ultGlowPulse.stop(); this._ultGlowPulse = null; }
+    if (this._ultGlow) { this._ultGlow.destroy(); this._ultGlow = null; }
   }
 
   /**
@@ -694,20 +785,52 @@ export class Fighter {
   // --- Interne ---
 
   _playHurtFlash() {
-    // Sprite : tint fill blanc (remplace tous les pixels par du blanc).
-    // Rectangle : setFillStyle.
+    // Flash blanc 120ms (allongé pour meilleure visibilité)
     if (this.body.setTintFill) {
       this.body.setTintFill(0xffffff);
     } else {
       this.body.setFillStyle(0xffffff);
     }
-    this.scene.time.delayedCall(100, () => {
+    this.scene.time.delayedCall(120, () => {
       if (!this.body || !this.body.scene) return;
       if (this.body.clearTint) {
         this.body.clearTint();
       } else {
         this.body.setFillStyle(this.color);
       }
+    });
+  }
+
+  /**
+   * Applique un knockback visuel sur cette unité (la cible).
+   * @param {number} fromX — X de l'attaquant (pour calculer la direction)
+   * @param {number} intensity — pixels de recul (typique : 8-15)
+   */
+  applyKnockback(fromX, intensity = 10) {
+    if (!this.isAlive || !this.container) return;
+    const dir = this.container.x > fromX ? 1 : -1;
+    const startX = this.container.x;
+    const targetX = startX + dir * intensity;
+    const tiltAngle = dir * 5; // 5° tilt dans la direction du knockback
+
+    // Phase 1 : push-back rapide
+    this.scene.tweens.add({
+      targets: this.container,
+      x: targetX,
+      angle: tiltAngle,
+      duration: 100,
+      ease: 'Quad.Out',
+      onComplete: () => {
+        // Phase 2 : retour à la position d'origine
+        if (!this.container || !this.isAlive) return;
+        this.scene.tweens.add({
+          targets: this.container,
+          x: startX,
+          angle: 0,
+          duration: 180,
+          ease: 'Quad.Out',
+        });
+      },
     });
   }
 }

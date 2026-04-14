@@ -310,6 +310,18 @@ export class CombatSystem {
     target.takeDamage(dmg);
     const actualDamage = hpBefore - target.hp;
 
+    // Knockback visuel proportionnel aux dégâts (8-15px)
+    if (target.isAlive && target.applyKnockback && attacker.container) {
+      const dmgRatio = actualDamage / Math.max(1, target.maxHp);
+      const intensity = Math.min(15, 6 + dmgRatio * 30);
+      target.applyKnockback(attacker.container.x, intensity);
+    }
+
+    // Screen flash sur gros impact (>30% HP cible)
+    if (actualDamage > target.maxHp * 0.3 && this.scene.cameras?.main) {
+      this.scene.cameras.main.flash(80, 255, 255, 255, false);
+    }
+
     // Floating damage.
     if (this.scene.floatingDamage) {
       this.scene.floatingDamage.spawn(

@@ -337,21 +337,50 @@ export class CombatScene extends Phaser.Scene {
     const speed = 400; // px/s
     const duration = Math.max(80, (dist / speed) * 1000);
 
+    // Trail : spawn périodique de petits dots qui fade out
+    const trailTimer = this.time.addEvent({
+      delay: 30,
+      loop: true,
+      callback: () => {
+        if (!proj.visible) return;
+        const trail = this.add.circle(proj.x, proj.y, size / 2, color, 0.7).setDepth(449);
+        this.tweens.add({
+          targets: trail,
+          alpha: 0,
+          scale: 0.3,
+          duration: 250,
+          ease: 'Quad.Out',
+          onComplete: () => trail.destroy(),
+        });
+      },
+    });
+
     this.tweens.add({
       targets: proj,
       x: target.container.x,
       y: target.container.y,
       duration,
       ease: 'Linear',
-      onUpdate: () => {
-        // Homing : suit la cible si elle bouge.
-        if (target.container && target.isAlive) {
-          // Pas de re-targeting mid-flight pour garder la trajectoire propre.
-        }
-      },
       onComplete: () => {
         proj.setVisible(false);
-        // Applique les dégâts uniquement si la cible est encore vivante.
+        trailTimer.remove();
+        // Impact burst : ring de particules à l'arrivée
+        const tx = target.container?.x || proj.x;
+        const ty = target.container?.y || proj.y;
+        for (let i = 0; i < 8; i++) {
+          const angle = (Math.PI * 2 * i) / 8;
+          const dot = this.add.circle(tx, ty, 3, color, 1).setDepth(451);
+          this.tweens.add({
+            targets: dot,
+            x: tx + Math.cos(angle) * 22,
+            y: ty + Math.sin(angle) * 22,
+            alpha: 0,
+            scale: 0.2,
+            duration: 280,
+            ease: 'Quad.Out',
+            onComplete: () => dot.destroy(),
+          });
+        }
         if (target.isAlive && onHit) onHit();
       },
     });
