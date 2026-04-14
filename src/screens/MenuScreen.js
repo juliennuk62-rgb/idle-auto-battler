@@ -143,8 +143,11 @@ export class MenuScreen {
         <button class="menu-logout-btn" id="menu-logout">Déconnexion</button>
       `;
       userDiv.querySelector('#menu-logout')?.addEventListener('click', async () => {
+        // 1. Sauvegarde cloud AVANT déconnexion (sinon les dernières données sont perdues)
+        try { await window.__cloudSaveAll?.(); } catch (e) {}
+        // 2. Déconnexion Firebase (n'efface PAS le localStorage)
         await AuthSystem.signOut();
-        localStorage.clear();
+        // 3. Reload sans rien effacer — le user pourra se reconnecter et retrouver ses données
         window.location.reload();
       });
     }
