@@ -91,8 +91,12 @@ async function boot() {
     localStorage.removeItem('idle_autobattler_world');
   }
 
-  // Cloud save périodique.
-  setInterval(() => cloudSaveAll(), 30000);
+  // Cloud save périodique avec timer visuel.
+  _createSaveIndicator();
+  setInterval(() => {
+    cloudSaveAll();
+    _flashSaveIndicator();
+  }, 30000);
   window.addEventListener('beforeunload', () => cloudSaveAll());
 
   // Toast de notification missions — actif partout (menu, combat, etc.)
@@ -355,6 +359,43 @@ async function cloudSaveAll() {
 }
 
 window.__cloudSaveAll = cloudSaveAll;
+
+// ─── Indicateur de sauvegarde ────────────────────────────────────────────────
+
+let _saveIndicator = null;
+let _saveCountdown = 30;
+let _saveTimer = null;
+
+function _createSaveIndicator() {
+  _saveIndicator = document.createElement('div');
+  _saveIndicator.id = 'save-indicator';
+  _saveIndicator.style.cssText = `
+    position: fixed; bottom: 8px; right: 12px; z-index: 99998;
+    font-family: 'Inter', system-ui, sans-serif; font-size: 11px;
+    color: #666; display: flex; align-items: center; gap: 6px;
+    pointer-events: none; transition: color 0.3s;
+  `;
+  document.body.appendChild(_saveIndicator);
+
+  // Countdown ticker
+  _saveCountdown = 30;
+  _saveTimer = setInterval(() => {
+    _saveCountdown = Math.max(0, _saveCountdown - 1);
+    if (_saveIndicator) {
+      _saveIndicator.innerHTML = `<span style="font-size:13px;">💾</span> ${_saveCountdown}s`;
+    }
+  }, 1000);
+}
+
+function _flashSaveIndicator() {
+  _saveCountdown = 30;
+  if (!_saveIndicator) return;
+  _saveIndicator.innerHTML = '<span style="font-size:13px;">✅</span> Sauvegardé';
+  _saveIndicator.style.color = '#22c55e';
+  setTimeout(() => {
+    if (_saveIndicator) _saveIndicator.style.color = '#666';
+  }, 2000);
+}
 window.__navigateTo = navigateTo;
 
 // Expose onCombatEnd pour que CombatScene puisse appeler.
