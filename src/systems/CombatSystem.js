@@ -15,6 +15,7 @@
 
 import { TelemetrySystem } from './TelemetrySystem.js';
 import { MissionSystem } from './MissionSystem.js';
+import { SynergySystem } from './SynergySystem.js';
 import { ResourceSystem } from './ResourceSystem.js';
 import { PrestigeSystem } from './PrestigeSystem.js';
 import { computeXpReward } from './Progression.js';
@@ -93,6 +94,16 @@ export class CombatSystem {
   }
 
   start() {
+    // Applique les synergies de classe
+    const activeSynergies = SynergySystem.apply(this.teamA);
+    this._activeSynergies = activeSynergies;
+
+    // Affiche les synergies actives via la bannière
+    if (activeSynergies.length > 0 && this.scene.waveBanner) {
+      const names = activeSynergies.map(s => `${s.icon} ${s.label}`).join(' · ');
+      this.scene.waveBanner.show('SYNERGIES', names, { holdMs: 2000, borderColor: 0x22c55e });
+    }
+
     TelemetrySystem.startCombat(this.currentWave, this.teamA, this.teamB);
     // Timers teamA : démarrés ici une seule fois au boot de la scène.
     // Timers teamB : démarrés par _spawnWaveMonsters() (qui gère aussi
@@ -231,7 +242,10 @@ export class CombatSystem {
     healer.playAttackTween();
 
     const variance = 0.85 + Math.random() * 0.30;
-    const healAmount = Math.max(1, Math.round(healer.atk * variance));
+    // Bonus heal% des synergies
+    const synergyHealBonus = this._activeSynergies?.some(s => s.bonus.healPercent) ?
+      this._activeSynergies.reduce((sum, s) => sum + (s.bonus.healPercent || 0), 0) : 0;
+    const healAmount = Math.max(1, Math.round(healer.atk * variance * (1 + synergyHealBonus / 100)));
     const hpBefore = target.hp;
     target.heal(healAmount);
     const actualHeal = target.hp - hpBefore;

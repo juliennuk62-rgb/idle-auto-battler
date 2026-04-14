@@ -47,6 +47,17 @@ Plus vous avancez dans les vagues, plus les récompenses augmentent.
 C'est la source principale d'or du jeu.`,
       },
       {
+        heading: 'Synergies de classe',
+        text: `Votre composition d'équipe active des bonus automatiques :
+**Duo Guerrier** (2 guerriers) — +10% HP
+**Duo Archer** (2 archers) — +15% ATK
+**Duo Mage** (2 mages) — +10% ATK, +10% vitesse
+**Ligne de Front** (2 guerriers + 1 healer) — +15% HP, +20% soin
+**Artillerie** (1 archer + 1 mage) — +10% ATK ranged
+**Équipe Équilibrée** (1 de chaque) — +5% à tout
+Les synergies actives sont affichées au début du combat.`,
+      },
+      {
         heading: 'Loot & Équipement',
         text: `Les monstres peuvent drop des items d'équipement. Les boss ont un meilleur taux de drop.
 Chaque biome a son propre set d'équipement (3 pièces). Équipez un set complet pour des bonus.`,
