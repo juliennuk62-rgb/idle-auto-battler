@@ -157,24 +157,42 @@ export class CombatSystem {
     if (attacker.abilityType === 'heal') return this._resolveHeal(attacker);
     if (attacker.abilityType === 'aoe') return this._resolveAoE(attacker, enemyTeam);
 
-    // --- Mode par défaut : single-target (warrior, archer, monster) ---
-    const target = attacker.engaged && attacker.engagedWith?.isAlive
-      ? attacker.engagedWith
-      : this._pickTarget(attacker, enemyTeam);
+    // --- Passif taunt_perm : force les ennemis à cibler ce fighter ---
+    let target;
+    const tauntFighter = enemyTeam === this.teamB
+      ? null // attaquant allié → cible un monstre (pas de taunt allié)
+      : this.teamA.find(f => f.isAlive && f.heroPassifs?.permanentTaunt);
+
+    if (tauntFighter && attacker.class === 'monster') {
+      target = tauntFighter; // Monstre forcé de cibler le tank taunt
+    } else {
+      target = attacker.engaged && attacker.engagedWith?.isAlive
+        ? attacker.engagedWith
+        : this._pickTarget(attacker, enemyTeam);
+    }
     if (!target) return;
     attacker.playAttackTween();
 
-    // Ranged → projectile visuel, dégât à l'arrivée.
-    // Mêlée → dégât instantané.
+    // --- Passif multiShot : lance N projectiles au lieu de 1 ---
+    const shotCount = attacker.heroPassifs?.multiShot || 1;
+
+    const applyHit = (t) => {
+      if (!t.isAlive) return;
+      this._applyDamage(attacker, t);
+      if (!t.isAlive) this._handleKill(attacker, t, enemyTeam);
+    };
+
     if (attacker.isRanged && this.scene.launchProjectile) {
-      this.scene.launchProjectile(attacker, target, () => {
-        if (!target.isAlive) return; // mort entre-temps
-        this._applyDamage(attacker, target);
-        if (!target.isAlive) this._handleKill(attacker, target, enemyTeam);
-      });
+      for (let i = 0; i < shotCount; i++) {
+        const delay = i * 150; // 150ms entre chaque tir
+        this.scene.time.delayedCall(delay, () => {
+          this.scene.launchProjectile(attacker, target, () => applyHit(target));
+        });
+      }
     } else {
-      this._applyDamage(attacker, target);
-      if (!target.isAlive) this._handleKill(attacker, target, enemyTeam);
+      for (let i = 0; i < shotCount; i++) {
+        applyHit(target);
+      }
     }
   }
 
@@ -234,6 +252,19 @@ export class CombatSystem {
       targetId: target.id,
       amount: actualHeal,
     });
+
+    // --- Passif healDamage (Déesse de la Vie UR) : les soins infligent 50% en dégâts ---
+    if (healer.heroPassifs?.healDamage && actualHeal > 0) {
+      const dmg = Math.round(actualHeal * healer.heroPassifs.healDamage / 100);
+      const enemy = this.teamB.filter(f => f.isAlive)[0]; // cible le premier ennemi vivant
+      if (enemy && dmg > 0) {
+        enemy.takeDamage(dmg);
+        if (this.scene.floatingDamage) {
+          this.scene.floatingDamage.spawn(enemy.container.x, enemy.container.y - 50, dmg, { color: '#a855f7' });
+        }
+        if (!enemy.isAlive) this._handleKill(healer, enemy, this.teamB);
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -246,7 +277,19 @@ export class CombatSystem {
    */
   _applyDamage(attacker, target) {
     const variance = 0.85 + Math.random() * 0.30;
-    const dmg = Math.max(1, Math.round(attacker.atk * variance));
+    let dmg = Math.max(1, Math.round(attacker.atk * variance));
+
+    // Passif aoeMult (Merlin UR) : ×5 dégâts en AoE
+    if (attacker.abilityType === 'aoe' && attacker.heroPassifs?.aoeMult) {
+      dmg = Math.round(dmg * attacker.heroPassifs.aoeMult);
+    }
+
+    // Passif armorPen (Tireur d'Élite SSR) : ignore 30% des défenses
+    // (réduit la résistance effective de la cible)
+    if (attacker.heroPassifs?.armorPen && target.heroPassifs) {
+      // Pour l'instant pas de système d'armure, le bonus augmente les dégâts de 30%
+      dmg = Math.round(dmg * (1 + attacker.heroPassifs.armorPen / 100));
+    }
 
     const hpBefore = target.hp;
     target.takeDamage(dmg);
@@ -292,6 +335,43 @@ export class CombatSystem {
    */
   _handleKill(attacker, target, enemyTeam) {
     const wasEnemy = enemyTeam === this.teamB;
+
+    // --- Passif lastStand (Dieu de la Guerre UR) : survit au premier coup mortel ---
+    if (!wasEnemy && target.heroPassifs?.lastStand && !target._lastStandUsed) {
+      target._lastStandUsed = true;
+      target.hp = Math.round(target.maxHp * 0.1); // Revient à 10% HP
+      target.isAlive = true;
+      target._updateHealthBar();
+      // Flash doré d'invincibilité
+      if (this.scene.floatingDamage) {
+        this.scene.floatingDamage.spawn(target.container.x, target.container.y - 60, 'IMMORTEL !', { color: '#fbbf24' });
+      }
+      return; // Annule la mort
+    }
+
+    // --- Passif autoRevive/infiniteRevive : revit un allié mort ---
+    if (wasEnemy) {
+      // Un ennemi est mort — check si un allié a le passif revive
+      const reviver = this.teamA.find(f =>
+        f.isAlive && f.heroPassifs?.autoRevive && !f._reviveUsed
+      );
+      const infiniteReviver = this.teamA.find(f =>
+        f.isAlive && f.heroPassifs?.infiniteRevive
+      );
+
+      if (reviver || infiniteReviver) {
+        const deadAlly = this.teamA.find(f => !f.isAlive);
+        if (deadAlly) {
+          deadAlly.hp = Math.round(deadAlly.maxHp * 0.5);
+          deadAlly.isAlive = true;
+          deadAlly.respawn?.();
+          if (reviver && !infiniteReviver) reviver._reviveUsed = true;
+          if (this.scene.floatingDamage) {
+            this.scene.floatingDamage.spawn(deadAlly.container.x, deadAlly.container.y - 60, 'RÉSURRECTION !', { color: '#22c55e' });
+          }
+        }
+      }
+    }
 
     // Hit stop.
     this.scene.tweens.pauseAll();

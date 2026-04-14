@@ -418,13 +418,21 @@ export class Fighter {
       let hp = Math.round(stats.hp * PrestigeSystem.getHpMultiplier());
       let atk = Math.round(stats.atk * PrestigeSystem.getAtkMultiplier());
 
-      // Hero gacha multiplicateurs — si un héros est assigné à ce fighter,
-      // ses stats sont boostées par le multiplicateur de rareté du héros.
+      // Hero gacha multiplicateurs + passifs.
       const heroMods = GachaSystem.getHeroModifiers(this.id);
       if (heroMods.statMult !== 1) {
         hp = Math.round(hp * heroMods.statMult);
         atk = Math.round(atk * heroMods.statMult);
       }
+
+      // Cache les effets passifs sur le fighter pour accès rapide en combat.
+      this.heroPassifs = {};
+      for (const p of heroMods.passifs) {
+        if (p.effect) Object.assign(this.heroPassifs, p.effect);
+      }
+      // Flags de passifs one-shot (reset chaque combat)
+      if (this.heroPassifs.lastStand && !this._lastStandUsed) this._lastStandUsed = false;
+      if (this.heroPassifs.autoRevive && !this._reviveUsed) this._reviveUsed = false;
 
       // Equipment bonus — items flat stats.
       const equipped = ItemSystem.getEquipped(this.id);
@@ -630,7 +638,9 @@ export class Fighter {
 
   chargeUltimate() {
     if (this.ultimateMax <= 0 || this.ultimateReady) return;
-    this.ultimateCharge = Math.min(this.ultimateMax, this.ultimateCharge + 1);
+    // Passif charge_rapide : ultime charge 2× plus vite
+    const chargeAmount = this.heroPassifs?.ultChargeBonus ? 2 : 1;
+    this.ultimateCharge = Math.min(this.ultimateMax, this.ultimateCharge + chargeAmount);
     if (this.ultimateCharge >= this.ultimateMax) {
       this.ultimateReady = true;
     }
