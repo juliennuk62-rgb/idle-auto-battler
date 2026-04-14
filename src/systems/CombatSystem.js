@@ -316,21 +316,35 @@ export class CombatSystem {
       LeaderboardSystem.recordDamage(actualDamage);
     }
 
+    // Détection "gros coup" : >= 25% HP max de la cible → hit-stop + floating damage agrandi
+    const dmgRatio = actualDamage / Math.max(1, target.maxHp);
+    const isBigHit = dmgRatio >= 0.25;
+
+    // Hit-stop sur gros coup : le temps fige brièvement (80ms) pour amplifier l'impact.
+    // Throttle : pas plus d'un hit-stop toutes les 400ms pour éviter le spam.
+    if (isBigHit && !this._lastHitStop) {
+      this._lastHitStop = Date.now();
+      const prevScale = this.scene.tweens.timeScale;
+      this.scene.tweens.timeScale = 0.15;
+      this.scene.time.delayedCall(80, () => {
+        if (this.scene && this.scene.tweens) this.scene.tweens.timeScale = prevScale;
+      });
+      this.scene.time.delayedCall(400, () => { this._lastHitStop = null; });
+    }
+
     // Knockback visuel proportionnel aux dégâts (8-15px)
     if (target.isAlive && target.applyKnockback && attacker.container) {
-      const dmgRatio = actualDamage / Math.max(1, target.maxHp);
       const intensity = Math.min(15, 6 + dmgRatio * 30);
       target.applyKnockback(attacker.container.x, intensity);
     }
 
-    // (Retiré : screen flash trop agressif, risque épilepsie)
-
-    // Floating damage.
+    // Floating damage (format "critical" si gros coup pour mise en valeur visuelle).
     if (this.scene.floatingDamage) {
       this.scene.floatingDamage.spawn(
         target.container.x,
         target.container.y - 50,
-        actualDamage
+        actualDamage,
+        { critical: isBigHit }
       );
     }
 
@@ -758,6 +772,13 @@ export class CombatSystem {
 
       this.teamB.push(m);
       this._startAttackTimer(m, this.teamA);
+    }
+
+    // Shake caméra + flash rouge à l'apparition d'un boss (dramatise l'arrivée).
+    if (isBoss && this.scene?.cameras?.main) {
+      this.scene.cameras.main.shake(650, 0.014);
+      // Flash rouge subtil (alpha 0.15) via camera flash
+      this.scene.cameras.main.flash(400, 200, 30, 30, false);
     }
   }
 

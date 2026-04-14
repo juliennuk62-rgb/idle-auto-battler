@@ -176,6 +176,10 @@ export class UnitCard {
     this.els.hpFill.style.width = `${hpRatio * 100}%`;
     this.els.hpLabel.textContent = `${Math.round(f.hp)} / ${Math.round(f.maxHp)}`;
 
+    // Bascule l'état visuel selon le ratio HP (gradient + pulse CSS)
+    this.els.hpFill.classList.toggle('critical', hpRatio > 0 && hpRatio < 0.3);
+    this.els.hpFill.classList.toggle('warning',  hpRatio >= 0.3 && hpRatio < 0.6);
+
     // La lag bar suit avec un délai CSS, mais on ne la set qu'au même
     // moment que la fill (le delay/transition CSS gère le retard visuel).
     this.els.hpLag.style.width = `${hpRatio * 100}%`;

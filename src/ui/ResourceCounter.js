@@ -83,6 +83,18 @@ export class ResourceCounter {
     // Les paliers sont vérifiés une fois le tween lancé — on utilise
     // la valeur finale pour détecter un franchissement.
     this._checkMilestones(oldValue, newValue);
+    // Pulse léger à chaque gain (quel qu'il soit) pour donner de la vie au HUD.
+    if (newValue > oldValue) {
+      this._pulseGain();
+    }
+  }
+
+  _pulseGain() {
+    this.root.classList.remove('gain');
+    void this.root.offsetWidth;
+    this.root.classList.add('gain');
+    // Retire la classe après l'animation pour permettre un nouveau trigger.
+    setTimeout(() => this.root.classList.remove('gain'), 420);
   }
 
   _startTween() {

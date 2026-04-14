@@ -75,29 +75,48 @@ export class WaveBanner {
     // si un nouveau show() arrive pendant qu'un ancien animait encore.
     this.scene.tweens.killTweensOf(this.container);
 
-    // Reset à droite hors-écran.
-    this.container.x = 900;
+    // Reset à droite hors-écran, légèrement tourné pour un feel dynamique.
+    this.container.x = 1000;
+    this.container.setScale(0.85);
+    this.container.setAngle(6);
+    this.container.setAlpha(0);
     this.container.setVisible(true);
-    this.container.setAlpha(1);
 
-    // Phase 1 — slide in depuis la droite.
+    // Phase 1 — slide in élastique depuis la droite avec overshoot + redressement.
     this.scene.tweens.add({
       targets: this.container,
       x: 400,
-      duration: 300,
+      scale: 1,
+      angle: 0,
+      alpha: 1,
+      duration: 560,
       ease: 'Back.Out',
+      easeParams: [1.8], // overshoot prononcé
     });
 
-    // Phase 2 — hold, puis slide-out vers la gauche (via delayedCall).
-    this.scene.time.delayedCall(300 + holdMs, () => {
+    // Phase 2 — hold, puis exit avec wind-up court (recul) puis fuite rapide.
+    this.scene.time.delayedCall(560 + holdMs, () => {
       if (!this.container || !this.container.scene) return;
+      // Micro wind-up : recule légèrement avant de partir (comme un élastique bandé)
       this.scene.tweens.add({
         targets: this.container,
-        x: -400,
-        duration: 300,
-        ease: 'Back.In',
+        x: 440,
+        duration: 140,
+        ease: 'Quad.Out',
         onComplete: () => {
-          if (this.container) this.container.setVisible(false);
+          if (!this.container || !this.container.scene) return;
+          this.scene.tweens.add({
+            targets: this.container,
+            x: -500,
+            scale: 0.7,
+            angle: -8,
+            alpha: 0,
+            duration: 360,
+            ease: 'Cubic.In',
+            onComplete: () => {
+              if (this.container) this.container.setVisible(false);
+            },
+          });
         },
       });
     });

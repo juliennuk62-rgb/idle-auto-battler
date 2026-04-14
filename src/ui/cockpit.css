@@ -952,6 +952,28 @@ li {
   font-size: 15px;
   font-weight: 700;
   min-width: 100px;
+  transition: box-shadow 250ms ease-out, transform 250ms ease-out;
+}
+
+/* Gain léger : pulse à chaque augmentation (couleur icône + léger bump) */
+.resource-counter.gain {
+  animation: resourceGain 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes resourceGain {
+  0%   { transform: scale(1);    box-shadow: inset 1px 1px 0 var(--border-accent), inset -1px -1px 0 #000; }
+  40%  { transform: scale(1.08); box-shadow: inset 1px 1px 0 var(--border-accent), inset -1px -1px 0 #000, 0 0 12px currentColor; }
+  100% { transform: scale(1);    box-shadow: inset 1px 1px 0 var(--border-accent), inset -1px -1px 0 #000; }
+}
+
+.resource-counter.gain .resource-icon {
+  animation: resourceIconSpin 420ms ease-out;
+}
+
+@keyframes resourceIconSpin {
+  0%   { transform: scale(1) rotate(0); }
+  50%  { transform: scale(1.35) rotate(-10deg); filter: drop-shadow(0 0 6px currentColor); }
+  100% { transform: scale(1) rotate(0); }
 }
 
 .resource-icon {
@@ -1009,11 +1031,33 @@ li {
   padding: 8px 10px;
   font-family: var(--font-sans);
   position: relative;
-  transition: background 200ms;
+  transition: background 200ms, transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 250ms ease-out;
+  transform-style: preserve-3d;
+  cursor: pointer;
 }
 
 .unit-card:hover {
   background: #2e2e50;
+  transform: translateY(-3px) perspective(600px) rotateX(3deg);
+  box-shadow: inset 2px 2px 0 var(--border-accent), inset -2px -2px 0 var(--bg-root),
+              0 8px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(96, 165, 250, 0.2);
+  z-index: 2;
+}
+
+/* Reflet de lumière subtil au hover */
+.unit-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.unit-card:hover::before {
+  opacity: 1;
 }
 
 .unit-card.dead {
@@ -1125,9 +1169,27 @@ li {
   top: 0;
   left: 0;
   height: 100%;
-  background: var(--heal);
+  background: linear-gradient(90deg, #22c55e 0%, #10b981 50%, #059669 100%);
   width: 0;
-  transition: width 300ms ease-out;
+  transition: width 300ms ease-out, box-shadow 200ms ease-out;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5), inset 0 0 4px rgba(255, 255, 255, 0.25);
+}
+
+/* HP warning (30-60%) — gradient orange */
+.progress-bar-fill.warning {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* HP critique (<30%) — rouge pulsant */
+.progress-bar-fill.critical {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  animation: hpCriticalPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes hpCriticalPulse {
+  0%   { box-shadow: 0 0 6px rgba(239, 68, 68, 0.5),  inset 0 0 4px rgba(255, 255, 255, 0.3); }
+  100% { box-shadow: 0 0 14px rgba(239, 68, 68, 0.9), 0 0 22px rgba(239, 68, 68, 0.4), inset 0 0 6px rgba(255, 200, 200, 0.5); }
 }
 
 /* Lag bar — couche blanche "fantôme" qui suit la HP réelle avec 400ms
@@ -1161,7 +1223,15 @@ li {
 }
 
 .progress-bar-xp .progress-bar-fill {
-  background: var(--gold);
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%);
+  background-size: 200% 100%;
+  animation: xpShimmer 2.5s linear infinite;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.5), inset 0 0 3px rgba(255, 255, 255, 0.35);
+}
+
+@keyframes xpShimmer {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
 
 /* ── Equipment slots dans UnitCard ────────────────────────── */
@@ -1182,11 +1252,46 @@ li {
   justify-content: center;
   position: relative;
   font-size: 14px;
-  transition: border-color 200ms;
+  overflow: hidden;
+  transition: border-color 200ms, box-shadow 200ms, transform 200ms;
 }
 
 .equip-slot.equipped {
   background: var(--bg-panel-hi);
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4), inset 0 0 4px rgba(251, 191, 36, 0.2);
+  animation: slotEquipPop 400ms ease-out;
+}
+
+/* Pop visuel quand un item est équipé (scale + brillance) */
+@keyframes slotEquipPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); box-shadow: 0 0 14px rgba(251, 191, 36, 0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Éclat doré qui traverse le slot une fois lors de l'équipement */
+.equip-slot.equipped::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 60%,
+    transparent 100%);
+  animation: slotShine 700ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes slotShine {
+  0%   { transform: translateX(0%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateX(50%); opacity: 0; }
 }
 
 .equip-slot-label {
@@ -1938,19 +2043,38 @@ li {
   top: 0;
   left: 0;
   height: 100%;
-  background: linear-gradient(90deg, var(--gold), #fde68a);
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #fde68a 100%);
+  background-size: 200% 100%;
   width: 0;
-  transition: width 200ms ease-out;
+  transition: width 200ms ease-out, box-shadow 300ms ease-out;
+  animation: ultShimmer 1.8s linear infinite;
+}
+
+@keyframes ultShimmer {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+/* À partir de 80% — un glow doré devient visible */
+.ult-gauge-fill[style*="width: 8"],
+.ult-gauge-fill[style*="width: 9"] {
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.7), 0 0 14px rgba(251, 191, 36, 0.4);
+}
+
+.ult-gauge.ready {
+  box-shadow: inset 1px 1px 0 #000, 0 0 12px rgba(251, 191, 36, 0.8);
 }
 
 .ult-gauge.ready .ult-gauge-fill {
-  background: linear-gradient(90deg, var(--gold), #fff);
-  animation: ult-glow 800ms ease-in-out infinite alternate;
+  background: linear-gradient(90deg, #fbbf24 0%, #fff 50%, #fbbf24 100%);
+  background-size: 200% 100%;
+  animation: ultShimmer 0.8s linear infinite, ultReadyPulse 1.2s ease-in-out infinite alternate;
+  box-shadow: 0 0 10px #fbbf24, 0 0 20px rgba(251, 191, 36, 0.6), 0 0 30px rgba(255, 255, 255, 0.3);
 }
 
-@keyframes ult-glow {
-  from { filter: brightness(1); }
-  to { filter: brightness(1.4) drop-shadow(0 0 4px var(--gold)); }
+@keyframes ultReadyPulse {
+  0%   { filter: brightness(1) saturate(1); transform: scaleY(1); }
+  100% { filter: brightness(1.35) saturate(1.3); transform: scaleY(1.1); }
 }
 
 .ult-btn {

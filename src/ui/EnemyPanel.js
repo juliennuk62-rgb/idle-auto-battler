@@ -132,6 +132,8 @@ export class EnemyPanel {
 
     const hpRatio = monster.maxHp > 0 ? Math.max(0, Math.min(1, monster.hp / monster.maxHp)) : 0;
     this.els.ehpFill.style.width = `${hpRatio * 100}%`;
+    this.els.ehpFill.classList.toggle('critical', hpRatio > 0 && hpRatio < 0.3);
+    this.els.ehpFill.classList.toggle('warning',  hpRatio >= 0.3 && hpRatio < 0.6);
     this.els.ehpLabel.textContent = monster.isAlive
       ? `${Math.round(monster.hp)} / ${Math.round(monster.maxHp)}`
       : 'MORT';

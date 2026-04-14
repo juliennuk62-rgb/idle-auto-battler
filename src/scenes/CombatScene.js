@@ -118,6 +118,13 @@ export class CombatScene extends Phaser.Scene {
     });
     this.hitEmitter.setDepth(550);
 
+    // Overlay de teinte ambiante par biome — rectangle transparent qui se superpose
+    // au background pour donner une identité colorée forte à chaque zone.
+    // Mode ADD donne un rendu légèrement lumineux (mieux que MULTIPLY sombre).
+    this.biomeOverlay = this.add.rectangle(400, 240, 800, 480, 0xffffff, 0);
+    this.biomeOverlay.setDepth(5);
+    this.biomeOverlay.setBlendMode(Phaser.BlendModes.MULTIPLY);
+
     // Pool de projectiles pour les ranged (archer/mage). Réutilisés via visible toggle.
     this.projectilePool = [];
 
@@ -933,6 +940,8 @@ export class CombatScene extends Phaser.Scene {
   /**
    * Applique un biome au fond : swap de texture si un background dédié
    * existe, sinon fallback sur le tint du background par défaut.
+   * Applique aussi un overlay de teinte ambiante qui colore tout l'écran
+   * (enforce l'identité visuelle du biome).
    */
   _applyBiome(biome) {
     if (!this.bgImage) return;
@@ -946,6 +955,29 @@ export class CombatScene extends Phaser.Scene {
       this.bgImage.setTexture('background');
       this.bgImage.setDisplaySize(800, 480);
       this.bgImage.setTint(biome.bgTint);
+    }
+
+    // Overlay ambiant de teinte — couleur spécifique par biome, alpha faible pour
+    // colorer toute la scène sans masquer le gameplay.
+    const ambientTints = {
+      forest: 0xc8f0c8,  // vert doux (assombrissement léger avec teinte verdure)
+      caves:  0x9ab4d4,  // bleu froid grotte
+      ruins:  0xe8d488,  // or sable
+      hell:   0xff9a80,  // rouge braise
+      snow:   0xdbe8ff,  // bleu glace
+      temple: 0xd4b0f0,  // violet mystique
+    };
+    const tint = ambientTints[biome.id];
+    if (this.biomeOverlay && tint !== undefined) {
+      this.tweens.add({
+        targets: this.biomeOverlay,
+        alpha: 0.25,
+        duration: 600,
+        ease: 'Quad.Out',
+      });
+      this.biomeOverlay.fillColor = tint;
+    } else if (this.biomeOverlay) {
+      this.biomeOverlay.alpha = 0;
     }
   }
 }

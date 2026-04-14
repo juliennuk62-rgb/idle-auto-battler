@@ -22,7 +22,7 @@ export class FloatingDamage {
    */
   spawn(x, y, value, options = {}) {
     const color = options.color || (options.critical ? '#fbbf24' : '#ffffff');
-    const size = options.critical ? 26 : 18;
+    const size = options.critical ? 28 : 18;
 
     const text = this._acquire();
     text.setFontSize(size);
@@ -30,29 +30,40 @@ export class FloatingDamage {
     text.setColor(color);
     text.setPosition(x, y);
     text.setAlpha(1);
+    text.setAngle(0);
     text.setVisible(true);
 
+    // Trajectoire en arc balistique : chaque floating damage part dans une direction
+    // légèrement différente, monte, puis ralentit en retombant via ease Quad.Out.
+    // Ajout d'une rotation random pour dynamiser.
+    const arcDx   = (Math.random() - 0.5) * 50;     // ±25px latéral
+    const arcDy   = -(80 + Math.random() * 40);      // 80-120px vers le haut
+    const rotEnd  = (Math.random() - 0.5) * 22;      // ±11° rotation finale
+
     // Phase 1 — pop-in : grossit rapidement avec Back.Out (léger dépassement).
-    const popDuration = 160;
     const popScaleFrom = 0.4;
-    const popScaleTo = options.critical ? 1.35 : 1.0;
+    const popScaleTo = options.critical ? 1.5 : 1.05;
     text.setScale(popScaleFrom);
 
     this.scene.tweens.add({
       targets: text,
       scaleX: popScaleTo,
       scaleY: popScaleTo,
-      duration: popDuration,
+      duration: 150,
       ease: 'Back.Out',
       onComplete: () => {
-        // Phase 2 — float up + fade out : le nombre monte doucement
-        // et disparaît. Quad.Out → le mouvement ralentit à la fin,
-        // plus lisible qu'une interpolation linéaire.
+        // Phase 2 — arc balistique + fade + shrink + rotation.
+        // Quad.Out donne l'impression d'une trajectoire qui décélère,
+        // comme un projectile qui retombe.
         this.scene.tweens.add({
           targets: text,
-          y: y - 55,
+          x: x + arcDx,
+          y: y + arcDy,
+          scaleX: popScaleTo * 0.75,
+          scaleY: popScaleTo * 0.75,
+          angle: rotEnd,
           alpha: 0,
-          duration: 540,
+          duration: options.critical ? 800 : 620,
           ease: 'Quad.Out',
           onComplete: () => this._release(text),
         });
