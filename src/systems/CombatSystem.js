@@ -317,10 +317,7 @@ export class CombatSystem {
       target.applyKnockback(attacker.container.x, intensity);
     }
 
-    // Screen flash sur gros impact (>30% HP cible)
-    if (actualDamage > target.maxHp * 0.3 && this.scene.cameras?.main) {
-      this.scene.cameras.main.flash(80, 255, 255, 255, false);
-    }
+    // (Retiré : screen flash trop agressif, risque épilepsie)
 
     // Floating damage.
     if (this.scene.floatingDamage) {
@@ -499,12 +496,20 @@ export class CombatSystem {
       // Élite = double roll de loot
       const lootRolls = this._waveEvent === 'elite' ? 2 : 1;
       for (let lr = 0; lr < lootRolls; lr++) {
+        // Snapshot inventaire AVANT roll pour détecter les auto-sells
+        const inventoryBefore = ItemSystem.inventory.length;
         const lootItem = ItemSystem.rollLoot(biome.id, this.currentWave, isBossWave);
         if (lootItem) {
           this._biomeStats.items++;
           MissionSystem.track('items_gained', 1);
           if (!this._biomeStats.lootLog) this._biomeStats.lootLog = [];
-          this._biomeStats.lootLog.push(lootItem);
+          // Vérifier si l'item est encore dans l'inventaire (kept) ou auto-vendu
+          const stillInInventory = ItemSystem.inventory.some(i => i.uid === lootItem.uid);
+          this._biomeStats.lootLog.push({ ...lootItem, kept: stillInInventory });
+          if (!stillInInventory) {
+            // Item auto-vendu — track l'or récupéré (sellValue ~ 50% du gold value)
+            this._biomeStats.autoSoldCount = (this._biomeStats.autoSoldCount || 0) + 1;
+          }
         }
         if (lootItem && this.scene.floatingDamage) {
           this.scene.floatingDamage.spawn(

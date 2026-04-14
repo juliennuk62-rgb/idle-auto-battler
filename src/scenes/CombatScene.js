@@ -475,18 +475,26 @@ export class CombatScene extends Phaser.Scene {
           ${data.victory ? '<div class="prep-recap-row"><span>Boss</span><span style="color:var(--heal)">Vaincu ✓</span></div>' : ''}
         </div>
 
-        ${data.lootLog.length > 0 ? `
-          <div class="prep-loot-title">BUTIN OBTENU</div>
-          <div class="prep-loot-line">
-            ${data.lootLog.map(item => `
-              <div class="prep-loot-item" style="border-color:${item.rarityColor};" title="${item.name} (${item.rarityName})">
-                <span class="prep-loot-icon">${item.icon}</span>
-                <div class="prep-loot-name">${item.name}</div>
-                <div class="prep-loot-rarity" style="color:${item.rarityColor}">${item.rarityName}</div>
-              </div>
-            `).join('')}
-          </div>
-        ` : '<div style="color:var(--text-tertiary);font-size:11px;margin-top:12px;">Aucun item droppé</div>'}
+        ${data.lootLog.length > 0 ? (() => {
+          const kept = data.lootLog.filter(i => i.kept !== false);
+          const sold = data.lootLog.filter(i => i.kept === false);
+          const display = kept.slice(0, 18); // max 18 affichés
+          const extraKept = Math.max(0, kept.length - 18);
+          return `
+            <div class="prep-loot-title">BUTIN OBTENU (${kept.length} conservés${sold.length > 0 ? ` · ${sold.length} auto-vendus` : ''})</div>
+            <div class="prep-loot-line">
+              ${display.map(item => `
+                <div class="prep-loot-item" style="border-color:${item.rarityColor};" title="${item.name} (${item.rarityName})">
+                  <span class="prep-loot-icon">${item.icon}</span>
+                  <div class="prep-loot-name">${item.name}</div>
+                  <div class="prep-loot-rarity" style="color:${item.rarityColor}">${item.rarityName}</div>
+                </div>
+              `).join('')}
+              ${extraKept > 0 ? `<div class="prep-loot-item" style="border-color:#666;color:#999;display:flex;align-items:center;justify-content:center;font-size:11px;">+${extraKept}<br>autres</div>` : ''}
+              ${sold.length > 0 ? `<div class="prep-loot-item" style="border-color:rgba(239,68,68,0.4);color:#f87171;display:flex;align-items:center;justify-content:center;font-size:10px;text-align:center;">${sold.length}×<br>auto-vendus<br>(inv. plein)</div>` : ''}
+            </div>
+          `;
+        })() : '<div style="color:var(--text-tertiary);font-size:11px;margin-top:12px;">Aucun item droppé</div>'}
 
         <button class="prep-ready-btn" style="margin-top:20px;">${data.victory ? 'RETOUR À LA CARTE' : 'RETOUR'}</button>
       </div>
@@ -534,18 +542,26 @@ export class CombatScene extends Phaser.Scene {
           <div class="prep-recap-row"><span>Items droppés</span><span>${recap.items}</span></div>
           <div class="prep-recap-row"><span>Morts d'alliés</span><span style="color:var(--damage)">${recap.deaths}</span></div>
         </div>
-        ${(recap.lootLog && recap.lootLog.length > 0) ? `
-          <div class="prep-loot-title">BUTIN OBTENU</div>
-          <div class="prep-loot-line">
-            ${recap.lootLog.map(item => `
-              <div class="prep-loot-item" style="border-color:${item.rarityColor};" title="${item.name} (${item.rarityName} · ${item.type})">
-                <span class="prep-loot-icon">${item.icon}</span>
-                <div class="prep-loot-name">${item.name}</div>
-                <div class="prep-loot-rarity" style="color:${item.rarityColor}">${item.rarityName}</div>
-              </div>
-            `).join('')}
-          </div>
-        ` : '<div style="color:var(--text-tertiary);font-size:11px;margin-top:8px;">Aucun item droppé ce biome</div>'}
+        ${(recap.lootLog && recap.lootLog.length > 0) ? (() => {
+          const kept = recap.lootLog.filter(i => i.kept !== false);
+          const sold = recap.lootLog.filter(i => i.kept === false);
+          const display = kept.slice(0, 18);
+          const extraKept = Math.max(0, kept.length - 18);
+          return `
+            <div class="prep-loot-title">BUTIN OBTENU (${kept.length} conservés${sold.length > 0 ? ` · ${sold.length} auto-vendus` : ''})</div>
+            <div class="prep-loot-line">
+              ${display.map(item => `
+                <div class="prep-loot-item" style="border-color:${item.rarityColor};" title="${item.name} (${item.rarityName} · ${item.type})">
+                  <span class="prep-loot-icon">${item.icon}</span>
+                  <div class="prep-loot-name">${item.name}</div>
+                  <div class="prep-loot-rarity" style="color:${item.rarityColor}">${item.rarityName}</div>
+                </div>
+              `).join('')}
+              ${extraKept > 0 ? `<div class="prep-loot-item" style="border-color:#666;color:#999;display:flex;align-items:center;justify-content:center;font-size:11px;">+${extraKept}<br>autres</div>` : ''}
+              ${sold.length > 0 ? `<div class="prep-loot-item" style="border-color:rgba(239,68,68,0.4);color:#f87171;display:flex;align-items:center;justify-content:center;font-size:10px;text-align:center;">${sold.length}×<br>auto-vendus<br>(inv. plein)</div>` : ''}
+            </div>
+          `;
+        })() : '<div style="color:var(--text-tertiary);font-size:11px;margin-top:8px;">Aucun item droppé ce biome</div>'}
         <div class="prep-hint">Équipez vos items maintenant — l'équipement sera verrouillé pendant le combat</div>
         <button class="prep-ready-btn">PRÊT</button>
       </div>
