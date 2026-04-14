@@ -2232,6 +2232,39 @@ li {
   white-space: nowrap;
 }
 
+.menu-btn-new {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 12px rgba(251,191,36,0.4);
+  animation: newBtnPulse 1.5s ease-in-out infinite alternate;
+}
+
+.menu-btn-new-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 6px rgba(239,68,68,0.5);
+}
+
+@keyframes newBtnPulse {
+  0% { box-shadow: 0 0 8px rgba(251,191,36,0.3); }
+  100% { box-shadow: 0 0 18px rgba(251,191,36,0.6); }
+}
+
+.onboard-notif-card { position: relative; }
+.onboard-notif-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 12px rgba(251,191,36,0.4));
+}
+
 @keyframes arrowPulse {
   0% { opacity: 0.7; transform: translateY(-50%) translateX(0); }
   100% { opacity: 1; transform: translateY(-50%) translateX(-4px); }

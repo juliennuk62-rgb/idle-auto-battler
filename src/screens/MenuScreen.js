@@ -100,17 +100,24 @@ export class MenuScreen {
 
     // Onboarding — grise les boutons non débloqués
     const unlocked = OnboardingSystem.getUnlockedButtons();
+    const newButtons = OnboardingSystem.getNewButtons();
     if (unlocked) {
       this.el.querySelectorAll('[data-nav]').forEach(btn => {
         const nav = btn.dataset.nav;
         if (!unlocked.includes(nav)) {
           btn.classList.add('menu-btn-locked');
           btn.setAttribute('disabled', 'true');
-          // Ajoute un cadenas
           const lock = document.createElement('span');
           lock.className = 'menu-btn-lock';
           lock.textContent = '🔒';
           btn.appendChild(lock);
+        } else if (newButtons.includes(nav)) {
+          // Badge "NEW!" sur les boutons fraîchement débloqués
+          btn.classList.add('menu-btn-new');
+          const badge = document.createElement('span');
+          badge.className = 'menu-btn-new-badge';
+          badge.textContent = 'NEW';
+          btn.appendChild(badge);
         }
       });
 
@@ -201,7 +208,26 @@ export class MenuScreen {
     // Popup de bienvenue au premier lancement
     if (OnboardingSystem.needsWelcome()) {
       this._showWelcome();
+    } else {
+      // Notification de palier franchi (après une victoire)
+      const notif = OnboardingSystem.consumeNotification();
+      if (notif) this._showNotification(notif);
     }
+  }
+
+  _showNotification(notif) {
+    const popup = document.createElement('div');
+    popup.className = 'onboard-welcome';
+    popup.innerHTML = `
+      <div class="onboard-welcome-card onboard-notif-card">
+        <div class="onboard-notif-icon">${notif.icon}</div>
+        <div class="onboard-welcome-title">${notif.title}</div>
+        <div class="onboard-welcome-text">${notif.text}</div>
+        <button class="onboard-welcome-btn" id="onboard-notif-ok">Compris !</button>
+      </div>
+    `;
+    this.el.appendChild(popup);
+    popup.querySelector('#onboard-notif-ok').addEventListener('click', () => popup.remove());
   }
 
   _showWelcome() {
