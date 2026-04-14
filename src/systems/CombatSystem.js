@@ -381,16 +381,29 @@ export class CombatSystem {
 
     // Shake + zoom pour kills ennemis uniquement.
     if (wasEnemy) {
-      this.scene.cameras.main.shake(90, 0.005);
+      const isBossKill = target.isBoss;
+      const shakeIntensity = isBossKill ? 0.012 : 0.005;
+      const shakeDuration = isBossKill ? 200 : 90;
+      this.scene.cameras.main.shake(shakeDuration, shakeIntensity);
+
       const cam = this.scene.cameras.main;
       const originalZoom = cam.zoom;
+      const zoomFactor = isBossKill ? 1.06 : 1.03;
       this.scene.tweens.add({
         targets: cam,
-        zoom: originalZoom * 1.03,
-        duration: 80,
+        zoom: originalZoom * zoomFactor,
+        duration: isBossKill ? 200 : 80,
         yoyo: true,
         ease: 'Quad.Out',
       });
+
+      // Slow-mo sur boss kill — ralentit le jeu 250ms pour un effet dramatique
+      if (isBossKill) {
+        this.scene.time.timeScale = 0.3;
+        this.scene.time.delayedCall(250, () => {
+          this.scene.time.timeScale = 1;
+        });
+      }
     }
 
     // Télémétrie : mort.
@@ -417,9 +430,12 @@ export class CombatSystem {
     // Récompense or + gems.
     if (wasEnemy) {
       const reward = computeKillReward(this.currentWave);
-      ResourceSystem.addGold(reward.gold);
-      this.combatGoldEarned += reward.gold;
-      MissionSystem.track('gold_earned', reward.gold);
+      // Applique les bonus gold% de l'équipe
+      const teamGoldBonus = this.teamA.reduce((sum, f) => sum + (f.goldBonus || 0), 0);
+      const finalGold = Math.round(reward.gold * (1 + teamGoldBonus / 100));
+      ResourceSystem.addGold(finalGold);
+      this.combatGoldEarned += finalGold;
+      MissionSystem.track('gold_earned', finalGold);
       if (reward.gems > 0) {
         ResourceSystem.addGems(reward.gems);
         this.combatGemsEarned += reward.gems;
@@ -462,7 +478,9 @@ export class CombatSystem {
       }
 
       // XP distribution.
-      const xpReward = computeXpReward(this.currentWave);
+      const baseXp = computeXpReward(this.currentWave);
+      const teamXpBonus = this.teamA.reduce((sum, f) => sum + (f.xpBonus || 0), 0);
+      const xpReward = Math.round(baseXp * (1 + teamXpBonus / 100));
       for (const ally of this.teamA) {
         if (!ally.isAlive) continue;
         const levelBefore = ally.level;

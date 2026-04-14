@@ -281,8 +281,16 @@ export class Fighter {
 
     // Burst de particules — plus gros pour un boss (visible + mérité).
     if (this.scene.impactEmitter) {
-      const count = this.isBoss ? 28 : 14;
+      const count = this.isBoss ? 40 : 16;
       this.scene.impactEmitter.explode(count, this.container.x, this.container.y);
+    }
+
+    // Flash blanc à la mort
+    if (this.body?.setTintFill) {
+      this.body.setTintFill(0xffffff);
+      this.scene.time.delayedCall(80, () => {
+        if (this.body?.clearTint) this.body.clearTint();
+      });
     }
 
     // Mort en 2 phases pour une sensation "rituelle" :
@@ -461,10 +469,16 @@ export class Fighter {
       // Enchantements percent + set bonuses
       let atkPct = 0;
       let hpPct = 0;
+      let speedPct = 0;
+      let goldPct = 0;
+      let xpPct = 0;
       for (const item of items) {
         for (const e of (item.enchants || [])) {
           if (e.mode === 'percent' && e.stat === 'atk') atkPct += e.value;
           if (e.mode === 'percent' && e.stat === 'hp') hpPct += e.value;
+          if (e.mode === 'percent' && e.stat === 'speed') speedPct += e.value;
+          if (e.mode === 'percent' && e.stat === 'gold') goldPct += e.value;
+          if (e.mode === 'percent' && e.stat === 'xp') xpPct += e.value;
         }
       }
       const setBonus = computeSetBonus(items);
@@ -473,6 +487,11 @@ export class Fighter {
 
       this.maxHp = Math.round(hp * (1 + hpPct / 100));
       this.atk = Math.round(atk * (1 + atkPct / 100));
+
+      // Enchantements speed, gold, xp — stockés pour lecture par CombatSystem
+      if (speedPct) this.atkSpeed = Math.max(0.3, this.atkSpeed * (1 - speedPct / 100));
+      this.goldBonus = goldPct;
+      this.xpBonus = xpPct;
     } else {
       this.maxHp = stats.hp;
       this.atk = stats.atk;
