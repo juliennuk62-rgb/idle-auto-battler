@@ -209,15 +209,16 @@ export class MenuScreen {
     popup.className = 'onboard-welcome';
     popup.innerHTML = `
       <div class="onboard-welcome-card">
-        <div class="onboard-welcome-title">Bienvenue, Aventurier !</div>
+        <div class="onboard-welcome-title">Les Terres de l'Oubli</div>
         <div class="onboard-welcome-text">
-          Le monde est menacé par des hordes de monstres. Constituez votre équipe,
-          combattez à travers 6 biomes, et devenez le héros ultime !
+          Les portails entre les mondes se sont brisés. Des créatures venues d'ailleurs
+          envahissent chaque biome, de la Forêt Ancestrale jusqu'au Temple des Dieux.
+          Vous êtes le dernier Commandant capable de les arrêter.
         </div>
         <div class="onboard-welcome-steps">
-          <div class="onboard-step">1. Lancez l'<strong>Aventure</strong> pour combattre</div>
-          <div class="onboard-step">2. Gagnez de l'<strong>or</strong> et des <strong>gemmes</strong></div>
-          <div class="onboard-step">3. Invoquez des <strong>héros</strong> et équipez votre équipe</div>
+          <div class="onboard-step">1. Menez votre escouade à travers <strong>6 biomes</strong> corrompus</div>
+          <div class="onboard-step">2. Invoquez des <strong>héros légendaires</strong> pour renforcer vos rangs</div>
+          <div class="onboard-step">3. Affrontez les <strong>Seigneurs</strong> de chaque territoire</div>
         </div>
         <button class="onboard-welcome-btn" id="onboard-ok">C'est parti !</button>
       </div>

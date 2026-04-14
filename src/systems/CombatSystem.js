@@ -578,7 +578,18 @@ export class CombatSystem {
         } else {
           if (nextStats.isBoss && this.scene.waveBanner) {
             const localWave = ((nextWave - 1) % 10) + 1;
-            this.scene.waveBanner.show('BOSS', `VAGUE ${localWave}/10`);
+            // Dialogue du boss selon le biome
+            const bossDialogues = {
+              forest: '"La forêt m\'appartient, intrus !"',
+              caves:  '"Personne ne quitte mes grottes vivant."',
+              ruins:  '"Mon règne est éternel... comme ma malédiction."',
+              hell:   '"Brûlez dans les flammes de l\'oubli !"',
+              snow:   '"Le froid vous prendra bien avant mes griffes."',
+              temple: '"Mortels... vous profanez ce lieu sacré."',
+            };
+            const biome = biomeForWave(nextWave);
+            const dialogue = bossDialogues[biome.id] || '"Préparez-vous !"';
+            this.scene.waveBanner.show('BOSS', `${dialogue}`);
           }
           const delayMs = nextStats.isBoss
             ? BALANCE.wave.boss_intro_delay * 1000

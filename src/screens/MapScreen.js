@@ -11,12 +11,12 @@ import { InventoryModal } from '../ui/InventoryModal.js';
 // Positions calibrées sur la carte pixel art générée par l'utilisateur.
 // Coordonnées en % de l'image (responsive).
 const ZONE_POSITIONS = {
-  forest: { x: 22, y: 78, label: 'Forêt' },
-  caves:  { x: 35, y: 48, label: 'Grottes' },
-  ruins:  { x: 42, y: 22, label: 'Ruines' },
-  hell:   { x: 72, y: 18, label: 'Enfer' },
-  snow:   { x: 55, y: 65, label: 'Neige' },
-  temple: { x: 92, y: 32, label: 'Temple' },
+  forest: { x: 22, y: 78, label: 'Forêt',   lore: 'Les arbres murmurent des avertissements que personne n\'écoute.' },
+  caves:  { x: 35, y: 48, label: 'Grottes',  lore: 'Dans les profondeurs, les trolls règnent sans partage.' },
+  ruins:  { x: 42, y: 22, label: 'Ruines',   lore: 'Les pharaons maudits refusent le repos éternel.' },
+  hell:   { x: 72, y: 18, label: 'Enfer',    lore: 'Le sol craque sous la chaleur. Même l\'air brûle.' },
+  snow:   { x: 55, y: 65, label: 'Neige',    lore: 'Le froid n\'est pas le pire ennemi ici. C\'est le silence.' },
+  temple: { x: 92, y: 32, label: 'Temple',   lore: 'Les gardiens éternels n\'ont jamais échoué. Jusqu\'à maintenant.' },
 };
 
 // Le donjon est maintenant accessible depuis le menu principal, pas la carte.
@@ -124,6 +124,7 @@ export class MapScreen {
       div.innerHTML = `
         <div class="map-zone-dot"></div>
         <div class="map-zone-label">${pos.label}</div>
+        <div class="map-zone-lore">${zone.unlocked ? pos.lore : '???'}</div>
         ${zone.cleared ? '<div class="map-zone-check">✓</div>' : ''}
         ${!zone.unlocked ? '<div class="map-zone-lock">🔒</div>' : ''}
         ${zone.bestWave > 0 ? `<div class="map-zone-wave">W${zone.bestWave}</div>` : ''}
