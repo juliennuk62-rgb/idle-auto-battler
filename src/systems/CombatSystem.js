@@ -373,27 +373,29 @@ export class CombatSystem {
       return; // Annule la mort
     }
 
-    // --- Passif autoRevive/infiniteRevive : revit un allié mort ---
-    if (wasEnemy) {
-      // Un ennemi est mort — check si un allié a le passif revive
+    // --- Passif autoRevive/infiniteRevive : revit l'allié qui vient de mourir ---
+    // FIX C1 : le revive doit se déclencher quand un ALLIÉ meurt (pas quand un ennemi meurt).
+    // L'ancienne logique (wasEnemy) ne revivait jamais correctement parce qu'elle cherchait
+    // un allié mort au moment où un ennemi tombait, ce qui n'arrivait presque jamais.
+    if (!wasEnemy) {
+      // Le target est un allié qui vient de mourir — check si un autre allié a le passif revive
       const reviver = this.teamA.find(f =>
-        f.isAlive && f.heroPassifs?.autoRevive && !f._reviveUsed
+        f.isAlive && f !== target && f.heroPassifs?.autoRevive && !f._reviveUsed
       );
       const infiniteReviver = this.teamA.find(f =>
-        f.isAlive && f.heroPassifs?.infiniteRevive
+        f.isAlive && f !== target && f.heroPassifs?.infiniteRevive
       );
 
       if (reviver || infiniteReviver) {
-        const deadAlly = this.teamA.find(f => !f.isAlive);
-        if (deadAlly) {
-          deadAlly.hp = Math.round(deadAlly.maxHp * 0.5);
-          deadAlly.isAlive = true;
-          deadAlly.respawn?.();
-          if (reviver && !infiniteReviver) reviver._reviveUsed = true;
-          if (this.scene.floatingDamage) {
-            this.scene.floatingDamage.spawn(deadAlly.container.x, deadAlly.container.y - 60, 'RÉSURRECTION !', { color: '#22c55e' });
-          }
+        // Ressuscite le target qui vient de mourir, à 50% HP
+        target.hp = Math.round(target.maxHp * 0.5);
+        target.isAlive = true;
+        target.respawn?.();
+        if (reviver && !infiniteReviver) reviver._reviveUsed = true;
+        if (this.scene.floatingDamage) {
+          this.scene.floatingDamage.spawn(target.container.x, target.container.y - 60, 'RÉSURRECTION !', { color: '#22c55e' });
         }
+        return; // Annule la mort, on n'exécute pas le reste de _handleKill
       }
     }
 
@@ -667,6 +669,7 @@ export class CombatSystem {
     // Détruire les anciens monstres.
     for (const m of this.teamB) {
       if (m.attackTimer) { m.attackTimer.remove(); m.attackTimer = null; }
+      m.cleanupTweens?.(); // FIX C2 : libère idle tween + glow ulti
       if (m.container) m.container.destroy();
     }
     this.teamB.length = 0;

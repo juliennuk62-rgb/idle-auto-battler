@@ -64,12 +64,41 @@ async function boot() {
   }
 
   if (cloudData) {
-    // Compare les timestamps : si le local est PLUS RÉCENT que le cloud,
-    // on garde le local (le user a joué offline, ses données sont plus à jour).
+    // FIX C3 : comparaison robuste cloud/local pour éviter l'écrasement
+    // d'un cloud valide par du local stale.
+    //
+    // Scénarios à gérer :
+    //   a) cloud a des données, local est vide → TOUJOURS prendre le cloud
+    //   b) local a des données, cloud est vide → garder le local
+    //   c) les deux ont des données ET des ts valides → comparer les ts
+    //   d) les deux ont des données MAIS au moins un ts manquant → préférer le cloud
+    //      (le local peut venir d'une install partielle ou d'un autre compte)
     const localSave = JSON.parse(localStorage.getItem('idle_autobattler_save') || 'null');
     const cloudTs = cloudData.save?.ts || 0;
     const localTs = localSave?.ts || 0;
-    const useCloud = cloudTs > localTs;
+
+    const cloudHasData = !!(cloudData.save || cloudData.inventory || cloudData.prestige || cloudData.gacha);
+    const localHasData = !!localSave;
+
+    let useCloud;
+    if (cloudHasData && !localHasData) {
+      // Scénario a : cloud plein, local vide → récupération évidente
+      useCloud = true;
+      console.log('[Boot] Cloud plein, local vide → restauration depuis cloud');
+    } else if (!cloudHasData && localHasData) {
+      // Scénario b : local plein, cloud vide → garder local (prochain cloudSave enverra)
+      useCloud = false;
+      console.log('[Boot] Local plein, cloud vide → conservation du localStorage');
+    } else if (cloudHasData && localHasData && (cloudTs === 0 || localTs === 0)) {
+      // Scénario d : au moins un ts manquant → préférer le cloud par sécurité
+      // (protection anti-écrasement : mieux vaut perdre de la progression locale
+      //  potentiellement stale que d'écraser un cloud valide d'un autre device)
+      useCloud = true;
+      console.warn('[Boot] Timestamps manquants (cloudTs=' + cloudTs + ', localTs=' + localTs + ') → préférence cloud par sécurité');
+    } else {
+      // Scénario c : comparaison normale des timestamps
+      useCloud = cloudTs > localTs;
+    }
 
     if (useCloud) {
       console.log('[Boot] Restauration depuis cloud (plus récent que local)');

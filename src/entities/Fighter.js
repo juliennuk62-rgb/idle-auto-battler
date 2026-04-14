@@ -303,9 +303,33 @@ export class Fighter {
     });
   }
 
+  /**
+   * FIX C2 : nettoie les tweens persistants (idle breath, glow ulti).
+   * À appeler depuis die() et avant tout container.destroy() externe.
+   */
+  cleanupTweens() {
+    if (this._idleTween) {
+      this._idleTween.stop();
+      this._idleTween.remove();
+      this._idleTween = null;
+    }
+    if (this._ultGlowPulse) {
+      this._ultGlowPulse.stop();
+      this._ultGlowPulse = null;
+    }
+    if (this._ultGlow) {
+      this._ultGlow.destroy();
+      this._ultGlow = null;
+    }
+  }
+
   die() {
     this.isAlive = false;
     if (this.attackTimer) this.attackTimer.paused = true;
+
+    // FIX C2 : stopper le tween idle infinite pour éviter une fuite mémoire.
+    // Sans ça, les tweens s'accumulent dans Phaser.tweens.tweens[] pendant les sessions longues.
+    this.cleanupTweens();
 
     // TD : désengager le partenaire pour qu'il reprenne sa marche.
     if (this.engagedWith) {
@@ -396,6 +420,9 @@ export class Fighter {
     });
 
     if (this.attackTimer) this.attackTimer.paused = false;
+
+    // FIX C2 : relance l'animation idle après résurrection (sinon le héros ne respire plus).
+    if (!this._idleTween) this._startIdleAnim();
   }
 
   // ---------------------------------------------------------------------------
