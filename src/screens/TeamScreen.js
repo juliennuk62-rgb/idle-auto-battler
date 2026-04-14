@@ -82,7 +82,7 @@ export class TeamScreen {
                 const rarity = HERO_RARITIES[hero.rarity];
                 const isAssigned = Object.values(assignments).includes(heroId);
                 return `
-                  <div class="team-hero-card ${isAssigned ? 'team-hero-assigned' : ''}" data-hero="${heroId}">
+                  <div class="team-hero-card ${isAssigned ? 'team-hero-assigned' : ''}" data-hero="${heroId}" data-rarity="${hero.rarity}">
                     <div class="team-hero-rarity" style="color:${rarity.color}">${rarity.name}</div>
                     <div class="team-hero-name">${hero.name}</div>
                     <div class="team-hero-class">${hero.class}</div>

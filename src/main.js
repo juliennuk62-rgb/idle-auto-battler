@@ -189,8 +189,19 @@ async function boot() {
 // ─── Navigation entre écrans ─────────────────────────────────────────────────
 
 function navigateTo(screen, data) {
-  // Nettoie l'écran actuel.
-  if (currentScreen && currentScreen.hide) currentScreen.hide();
+  // Transition de sortie : pendant 150ms on laisse l'écran jouer son fade+slide out
+  // avant de l'enlever du DOM. Le nouvel écran apparaît en parallèle avec sa propre
+  // animation screenEnter (fade+slide from bottom).
+  const oldScreen = currentScreen;
+  const oldEl = oldScreen?.el;
+  if (oldEl && oldEl.classList) {
+    oldEl.classList.add('screen-exiting');
+  }
+  // Nettoie l'écran actuel — décalage léger pour laisser l'animation de sortie se jouer.
+  if (oldScreen && oldScreen.hide) {
+    if (oldEl) setTimeout(() => oldScreen.hide(), 150);
+    else oldScreen.hide();
+  }
   if (screen !== 'combat') hideGame();
 
   switch (screen) {

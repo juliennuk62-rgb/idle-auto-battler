@@ -11,6 +11,8 @@ import { TelemetrySystem } from '../systems/TelemetrySystem.js';
 import { MissionSystem } from '../systems/MissionSystem.js';
 import { OnboardingSystem } from '../systems/OnboardingSystem.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
+import { Toast } from '../ui/ToastSystem.js';
+import { LeaderboardModal } from '../ui/LeaderboardModal.js';
 
 export class MenuScreen {
   constructor(onNavigate) {
@@ -219,18 +221,12 @@ export class MenuScreen {
   }
 
   _showNotification(notif) {
-    const popup = document.createElement('div');
-    popup.className = 'onboard-welcome';
-    popup.innerHTML = `
-      <div class="onboard-welcome-card onboard-notif-card">
-        <div class="onboard-notif-icon">${notif.icon}</div>
-        <div class="onboard-welcome-title">${notif.title}</div>
-        <div class="onboard-welcome-text">${notif.text}</div>
-        <button class="onboard-welcome-btn" id="onboard-notif-ok">Compris !</button>
-      </div>
-    `;
-    this.el.appendChild(popup);
-    popup.querySelector('#onboard-notif-ok').addEventListener('click', () => popup.remove());
+    // Migration vers Toast unifié — plus léger qu'un full-screen popup.
+    Toast.info(notif.title, {
+      icon: notif.icon,
+      desc: notif.text,
+      duration: 5000, // un peu plus long pour laisser le temps de lire
+    });
   }
 
   _showWelcome() {
