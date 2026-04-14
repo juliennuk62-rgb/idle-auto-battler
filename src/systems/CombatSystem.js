@@ -430,9 +430,13 @@ export class CombatSystem {
     // Récompense or + gems.
     if (wasEnemy) {
       const reward = computeKillReward(this.currentWave);
-      // Applique les bonus gold% de l'équipe
+      // Applique les bonus gold% de l'équipe + événements
       const teamGoldBonus = this.teamA.reduce((sum, f) => sum + (f.goldBonus || 0), 0);
-      const finalGold = Math.round(reward.gold * (1 + teamGoldBonus / 100));
+      let eventGoldMult = 1;
+      if (this._goldRainWaves > 0 || this._waveEvent === 'gold_rain') eventGoldMult += 0.5;
+      if (this._waveEvent === 'curse') eventGoldMult *= 2;
+      if (this._waveEvent === 'elite') eventGoldMult *= 1.5;
+      const finalGold = Math.round(reward.gold * (1 + teamGoldBonus / 100) * eventGoldMult);
       ResourceSystem.addGold(finalGold);
       this.combatGoldEarned += finalGold;
       MissionSystem.track('gold_earned', finalGold);
@@ -460,6 +464,9 @@ export class CombatSystem {
       // Loot roll — chance de dropper un item.
       const biome = biomeForWave(this.currentWave);
       const isBossWave = this.currentWave % BALANCE.wave.boss_interval === 0;
+      // Élite = double roll de loot
+      const lootRolls = this._waveEvent === 'elite' ? 2 : 1;
+      for (let lr = 0; lr < lootRolls; lr++) {
       const lootItem = ItemSystem.rollLoot(biome.id, this.currentWave, isBossWave);
       if (lootItem) {
         this._biomeStats.items++;
@@ -476,6 +483,7 @@ export class CombatSystem {
           { color: lootItem.rarityColor }
         );
       }
+      } // fin boucle lootRolls
 
       // XP distribution.
       const baseXp = computeXpReward(this.currentWave);
@@ -618,12 +626,47 @@ export class CombatSystem {
 
     const stats = computeMonsterStats(wave);
     const wCfg = BALANCE.wave;
-    const count = monsterCountForWave(wave, wCfg.boss_interval, wCfg.monster_count_divisor, wCfg.max_monsters);
+    let count = monsterCountForWave(wave, wCfg.boss_interval, wCfg.monster_count_divisor, wCfg.max_monsters);
     const biome = biomeForWave(wave);
     const isBoss = stats.isBoss;
 
+    // ─── Événements de vague aléatoires ──────────────────────────────────
+    this._waveEvent = null;
+    if (!isBoss && wave >= 5) {
+      const roll = Math.random();
+      if (roll < 0.05) {
+        // BOSS SURPRISE (5%) — un mini-boss remplace la vague normale
+        this._waveEvent = 'boss_surprise';
+        stats.hp *= 3;
+        stats.atk *= 1.5;
+        count = 1;
+        if (this.scene.waveBanner) this.scene.waveBanner.show('⚠ BOSS SURPRISE', 'Mini-boss inattendu !', { holdMs: 1500, borderColor: 0xef4444 });
+      } else if (roll < 0.12) {
+        // VAGUE ÉLITE (7%) — mobs renforcés, double loot
+        this._waveEvent = 'elite';
+        stats.hp *= 1.5;
+        stats.atk *= 1.3;
+        count = Math.min(count + 2, 6);
+        if (this.scene.waveBanner) this.scene.waveBanner.show('⭐ VAGUE ÉLITE', 'Mobs renforcés — double loot !', { holdMs: 1500, borderColor: 0xa855f7 });
+      } else if (roll < 0.17 && wave >= 10) {
+        // PLUIE D'OR (5%) — +50% or pour cette vague
+        this._waveEvent = 'gold_rain';
+        this._goldRainWaves = 3;
+        if (this.scene.waveBanner) this.scene.waveBanner.show('💰 PLUIE D\'OR', '+50% or pendant 3 vagues !', { holdMs: 1500, borderColor: 0xfbbf24 });
+      } else if (roll < 0.22 && wave >= 15) {
+        // MALÉDICTION (5%) — ennemis +30% HP, récompense ×2
+        this._waveEvent = 'curse';
+        stats.hp *= 1.3;
+        if (this.scene.waveBanner) this.scene.waveBanner.show('💀 MALÉDICTION', 'Ennemis renforcés — récompense ×2 !', { holdMs: 1500, borderColor: 0xef4444 });
+      }
+    }
+
+    // Pluie d'or active (persiste 3 vagues)
+    if (this._goldRainWaves > 0) {
+      this._goldRainWaves--;
+    }
+
     // HP divisé entre les mobs d'une wave (le total reste constant).
-    // ATK inchangé par mob → plus de mobs = plus de DPS total (difficulté qui monte).
     const hpPerMob = Math.max(1, Math.round(stats.hp / count));
     const atkPerMob = stats.atk;
 
