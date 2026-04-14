@@ -206,6 +206,16 @@ export class GachaSystemImpl {
         this.assignedHeroes = data.assigned || {};
         this.pitySSR = data.pitySSR || 0;
         this.pityUR = data.pityUR || 0;
+        // Migration u1-u4 → slot_1-slot_5
+        const ID_MIG = { u1: 'slot_1', u2: 'slot_2', u3: 'slot_3', u4: 'slot_4', u5: 'slot_5' };
+        const newAssigned = {};
+        let migrated = false;
+        for (const [k, v] of Object.entries(this.assignedHeroes)) {
+          const newKey = ID_MIG[k] || k;
+          if (newKey !== k) migrated = true;
+          newAssigned[newKey] = v;
+        }
+        if (migrated) { this.assignedHeroes = newAssigned; this._save(); }
       }
     } catch (e) {}
   }

@@ -216,7 +216,17 @@ export class ItemSystemImpl {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         this.inventory = JSON.parse(raw);
-        deduplicateInventory(this.inventory); // nettoie les UIDs dupliqués
+        deduplicateInventory(this.inventory);
+        // Migration u1-u4 → slot_1-slot_5
+        const ID_MIGRATION = { u1: 'slot_1', u2: 'slot_2', u3: 'slot_3', u4: 'slot_4', u5: 'slot_5' };
+        let migrated = false;
+        for (const item of this.inventory) {
+          if (item.equippedOn && ID_MIGRATION[item.equippedOn]) {
+            item.equippedOn = ID_MIGRATION[item.equippedOn];
+            migrated = true;
+          }
+        }
+        if (migrated) this._save();
       }
     } catch(e) {
       this.inventory = [];
