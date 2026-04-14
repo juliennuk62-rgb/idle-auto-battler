@@ -876,6 +876,7 @@ export class CombatScene extends Phaser.Scene {
     // Retire les 3 du combat + détruit leur visuel.
     for (const f of trio) {
       this.combat.removeAlly(f);
+      f.cleanupTweens?.(); // FIX C2 : libère idle tween + glow ulti avant destroy
       if (f.container) f.container.destroy();
     }
 

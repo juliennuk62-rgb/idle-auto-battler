@@ -29,6 +29,7 @@ import { DailyRewardPopup } from './ui/DailyRewardPopup.js';
 import { MissionSystem } from './systems/MissionSystem.js';
 import { MissionScreen } from './screens/MissionScreen.js';
 import { MissionToast } from './ui/MissionToast.js';
+import { LeaderboardSystem } from './systems/LeaderboardSystem.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
@@ -129,6 +130,10 @@ async function boot() {
   } else {
     console.log('[Boot] Pas de cloud data — démarrage avec localStorage existant');
   }
+
+  // Leaderboard hebdomadaire : init après login (lit le weekId stocké,
+  // archive la semaine précédente si nécessaire, démarre le flush périodique).
+  LeaderboardSystem.init();
 
   // Cloud save périodique avec timer visuel.
   _createSaveIndicator();
@@ -443,6 +448,8 @@ async function cloudSaveAll() {
       dungeonRun: JSON.parse(localStorage.getItem('idle_autobattler_dungeon_run') || 'null'),
     };
     await AuthSystem.cloudSave(data);
+    // Flush du leaderboard hebdo en parallèle (collection séparée, ne bloque pas le save principal)
+    LeaderboardSystem.flush().catch(() => {});
   } catch (e) {
     console.error('[CloudSave] failed:', e);
   }

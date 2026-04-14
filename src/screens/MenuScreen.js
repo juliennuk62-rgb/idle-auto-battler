@@ -85,6 +85,11 @@ export class MenuScreen {
             <span class="menu-btn-label">ACHIEVEMENTS</span>
             <span class="menu-btn-desc">Défis et récompenses</span>
           </button>
+          <button class="menu-btn" data-nav="leaderboard">
+            <span class="menu-btn-icon">🥇</span>
+            <span class="menu-btn-label">CLASSEMENT</span>
+            <span class="menu-btn-desc">Top hebdomadaire multi-catégories</span>
+          </button>
           <button class="menu-btn" data-nav="stats">
             <span class="menu-btn-icon">📊</span>
             <span class="menu-btn-label">STATISTIQUES</span>
@@ -195,6 +200,10 @@ export class MenuScreen {
             break;
           case 'achievements':
             this.onNavigate('achievements');
+            break;
+          case 'leaderboard':
+            if (!this._lbModal) this._lbModal = new LeaderboardModal();
+            this._lbModal.open();
             break;
           case 'stats':
             if (!this._statsModal) this._statsModal = new StatsModal({ telemetry: TelemetrySystem });

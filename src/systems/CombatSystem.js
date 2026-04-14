@@ -17,6 +17,7 @@ import { TelemetrySystem } from './TelemetrySystem.js';
 import { MissionSystem } from './MissionSystem.js';
 import { SynergySystem } from './SynergySystem.js';
 import { AchievementSystem } from './AchievementSystem.js';
+import { LeaderboardSystem } from './LeaderboardSystem.js';
 import { ResourceSystem } from './ResourceSystem.js';
 import { PrestigeSystem } from './PrestigeSystem.js';
 import { computeXpReward } from './Progression.js';
@@ -310,6 +311,11 @@ export class CombatSystem {
     target.takeDamage(dmg);
     const actualDamage = hpBefore - target.hp;
 
+    // Leaderboard : record du plus gros coup de la semaine (seulement sur dmg infligé par allié)
+    if (actualDamage > 0 && this.teamA.includes(attacker)) {
+      LeaderboardSystem.recordDamage(actualDamage);
+    }
+
     // Knockback visuel proportionnel aux dégâts (8-15px)
     if (target.isAlive && target.applyKnockback && attacker.container) {
       const dmgRatio = actualDamage / Math.max(1, target.maxHp);
@@ -448,14 +454,19 @@ export class CombatSystem {
     if (wasEnemy) {
       MissionSystem.track('kills', 1);
       AchievementSystem.increment('kills');
+      LeaderboardSystem.recordKill();
       if (target.isBoss) {
         MissionSystem.track('boss_kills', 1);
         AchievementSystem.increment('boss_kills');
+        LeaderboardSystem.recordBossKill();
       }
     }
 
     // Track des morts alliées pour le récap biome.
-    if (!wasEnemy) this._biomeStats.deaths++;
+    if (!wasEnemy) {
+      this._biomeStats.deaths++;
+      LeaderboardSystem.recordAllyDeath();
+    }
 
     // Récompense or + gems.
     if (wasEnemy) {
@@ -471,6 +482,7 @@ export class CombatSystem {
       this.combatGoldEarned += finalGold;
       MissionSystem.track('gold_earned', finalGold);
       AchievementSystem.increment('total_gold', finalGold);
+      LeaderboardSystem.recordGold(finalGold);
       if (reward.gems > 0) {
         ResourceSystem.addGems(reward.gems);
         this.combatGemsEarned += reward.gems;
@@ -616,6 +628,7 @@ export class CombatSystem {
             this._spawnWaveMonsters(nextWave);
             this.currentWave = nextWave;
             TelemetrySystem.startCombat(this.currentWave, this.teamA, this.teamB);
+            LeaderboardSystem.recordWave(nextWave);
           });
         }
       } else if (!wasEnemy) {

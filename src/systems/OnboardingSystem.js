@@ -30,7 +30,7 @@ const STEPS = [
 <strong>🗡 Donjons</strong> : combat tour par tour stratégique<br>
 <strong>🏆 Achievements</strong> : 20 défis à relever<br>
 <br>Explorez à votre rythme !`,
-      newButtons: ['inventory', 'chests', 'summon', 'team', 'missions', 'talents', 'dungeons', 'achievements', 'collection', 'prestige', 'stats'],
+      newButtons: ['inventory', 'chests', 'summon', 'team', 'missions', 'talents', 'dungeons', 'achievements', 'collection', 'prestige', 'stats', 'leaderboard'],
     },
   },
 ];
