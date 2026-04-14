@@ -487,23 +487,22 @@ export class CombatSystem {
       // Élite = double roll de loot
       const lootRolls = this._waveEvent === 'elite' ? 2 : 1;
       for (let lr = 0; lr < lootRolls; lr++) {
-      const lootItem = ItemSystem.rollLoot(biome.id, this.currentWave, isBossWave);
-      if (lootItem) {
-        this._biomeStats.items++;
-        MissionSystem.track('items_gained', 1);
-        if (!this._biomeStats.lootLog) this._biomeStats.lootLog = [];
-        this._biomeStats.lootLog.push(lootItem);
+        const lootItem = ItemSystem.rollLoot(biome.id, this.currentWave, isBossWave);
+        if (lootItem) {
+          this._biomeStats.items++;
+          MissionSystem.track('items_gained', 1);
+          if (!this._biomeStats.lootLog) this._biomeStats.lootLog = [];
+          this._biomeStats.lootLog.push(lootItem);
+        }
+        if (lootItem && this.scene.floatingDamage) {
+          this.scene.floatingDamage.spawn(
+            target.container.x + 20,
+            target.container.y - 30,
+            `${lootItem.icon} ${lootItem.rarityName}`,
+            { color: lootItem.rarityColor }
+          );
+        }
       }
-      if (lootItem && this.scene.floatingDamage) {
-        // Floating icon colorée par rareté.
-        this.scene.floatingDamage.spawn(
-          target.container.x + 20,
-          target.container.y - 30,
-          `${lootItem.icon} ${lootItem.rarityName}`,
-          { color: lootItem.rarityColor }
-        );
-      }
-      } // fin boucle lootRolls
 
       // XP distribution.
       const baseXp = computeXpReward(this.currentWave);
