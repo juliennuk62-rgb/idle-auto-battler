@@ -12,3 +12,11 @@ desktop.ini
 # IDE
 .vscode/
 .idea/
+
+# Secrets — NE JAMAIS COMMITER
+.env
+.env.local
+.env.*.local
+
+# Sortie de l'orchestrateur multi-agent
+scripts/out/
