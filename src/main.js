@@ -53,47 +53,52 @@ async function boot() {
     });
   }
 
-  // Charge le cloud save.
-  const cloudData = await AuthSystem.cloudLoad();
+  // ─── Charge le cloud save (avec garde-fous anti-perte de données) ───
+  // Règle d'or : NE JAMAIS effacer le localStorage. Le local est la source
+  // de vérité primaire, le cloud n'est qu'une copie de secours.
+  let cloudData = null;
+  try {
+    cloudData = await AuthSystem.cloudLoad();
+  } catch (e) {
+    console.error('[Boot] cloudLoad failed, conservation du localStorage:', e);
+  }
+
   if (cloudData) {
-    if (cloudData.save) localStorage.setItem('idle_autobattler_save', JSON.stringify(cloudData.save));
-    if (cloudData.inventory) localStorage.setItem('idle_autobattler_inventory', JSON.stringify(cloudData.inventory));
-    if (cloudData.prestige) localStorage.setItem('idle_autobattler_prestige', JSON.stringify(cloudData.prestige));
-    if (cloudData.telemetry) localStorage.setItem('telemetry_aggregates', JSON.stringify(cloudData.telemetry));
-    if (typeof cloudData.soul === 'number') localStorage.setItem('idle_autobattler_soul', String(cloudData.soul));
-    if (cloudData.world) {
-      localStorage.setItem('idle_autobattler_world', JSON.stringify(cloudData.world));
-      WorldSystem.restore(cloudData.world);
-    }
-    if (cloudData.gacha) {
-      GachaSystem.restore(cloudData.gacha);
-    }
-    if (cloudData.daily) {
-      DailySystem.restore(cloudData.daily);
-    }
-    if (cloudData.missions) {
-      MissionSystem.restore(cloudData.missions);
-    }
-    if (cloudData.talents) {
-      TalentSystem.restore(cloudData.talents);
-    }
-    if (cloudData.onboarding) {
-      OnboardingSystem.restore(cloudData.onboarding);
-    }
-    if (cloudData.achievements) {
-      AchievementSystem.restore(cloudData.achievements);
-    }
-    if (cloudData.dungeonRun) {
-      localStorage.setItem('idle_autobattler_dungeon_run', JSON.stringify(cloudData.dungeonRun));
+    // Compare les timestamps : si le local est PLUS RÉCENT que le cloud,
+    // on garde le local (le user a joué offline, ses données sont plus à jour).
+    const localSave = JSON.parse(localStorage.getItem('idle_autobattler_save') || 'null');
+    const cloudTs = cloudData.save?.ts || 0;
+    const localTs = localSave?.ts || 0;
+    const useCloud = cloudTs > localTs;
+
+    if (useCloud) {
+      console.log('[Boot] Restauration depuis cloud (plus récent que local)');
+      if (cloudData.save) localStorage.setItem('idle_autobattler_save', JSON.stringify(cloudData.save));
+      if (cloudData.inventory) localStorage.setItem('idle_autobattler_inventory', JSON.stringify(cloudData.inventory));
+      if (cloudData.prestige) localStorage.setItem('idle_autobattler_prestige', JSON.stringify(cloudData.prestige));
+      if (cloudData.telemetry) localStorage.setItem('telemetry_aggregates', JSON.stringify(cloudData.telemetry));
+      if (typeof cloudData.soul === 'number') localStorage.setItem('idle_autobattler_soul', String(cloudData.soul));
+      if (cloudData.world) {
+        localStorage.setItem('idle_autobattler_world', JSON.stringify(cloudData.world));
+        WorldSystem.restore(cloudData.world);
+      }
+      if (cloudData.gacha) GachaSystem.restore(cloudData.gacha);
+      if (cloudData.daily) DailySystem.restore(cloudData.daily);
+      if (cloudData.missions) MissionSystem.restore(cloudData.missions);
+      if (cloudData.talents) TalentSystem.restore(cloudData.talents);
+      if (cloudData.onboarding) OnboardingSystem.restore(cloudData.onboarding);
+      if (cloudData.achievements) AchievementSystem.restore(cloudData.achievements);
+      if (cloudData.dungeonRun) localStorage.setItem('idle_autobattler_dungeon_run', JSON.stringify(cloudData.dungeonRun));
+
+      // Force un re-load de l'inventaire (ItemSystem singleton ne se recharge pas seul)
+      if (cloudData.inventory) {
+        try { (await import('./systems/ItemSystem.js')).ItemSystem._load(); } catch (e) {}
+      }
+    } else {
+      console.log('[Boot] Conservation du localStorage (plus récent que cloud)');
     }
   } else {
-    // Nouveau joueur — clean slate.
-    localStorage.removeItem('idle_autobattler_save');
-    localStorage.removeItem('idle_autobattler_inventory');
-    localStorage.removeItem('idle_autobattler_prestige');
-    localStorage.removeItem('telemetry_aggregates');
-    localStorage.removeItem('idle_autobattler_soul');
-    localStorage.removeItem('idle_autobattler_world');
+    console.log('[Boot] Pas de cloud data — démarrage avec localStorage existant');
   }
 
   // Cloud save périodique avec timer visuel.
@@ -102,7 +107,23 @@ async function boot() {
     cloudSaveAll();
     _flashSaveIndicator();
   }, 30000);
-  window.addEventListener('beforeunload', () => cloudSaveAll());
+
+  // beforeunload : sauvegarde synchrone en localStorage + tentative cloud (best effort)
+  window.addEventListener('beforeunload', () => {
+    cloudSaveAll(); // best effort, peut ne pas finir
+  });
+
+  // pagehide : plus fiable que beforeunload sur mobile/navigateurs modernes
+  window.addEventListener('pagehide', () => {
+    cloudSaveAll();
+  });
+
+  // visibilitychange : sauvegarde quand l'onglet devient invisible
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      cloudSaveAll();
+    }
+  });
 
   // Toast de notification missions — actif partout (menu, combat, etc.)
   missionToast = new MissionToast();
