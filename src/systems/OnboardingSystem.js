@@ -3,72 +3,34 @@
 
 const STORAGE_KEY = 'idle_autobattler_onboarding';
 
-// Définition des paliers : à chaque palier, on débloque + on notifie
+// 2 étapes simples :
+//   0 = nouveau joueur (seulement Aventure)
+//   1 = après 1ère victoire = TOUT débloqué
 const STEPS = [
-  // Étape 0 : nouveau joueur — seulement Aventure
   {
     step: 0,
     unlocked: ['map'],
     requires: { victories: 0 },
   },
-  // Étape 1 : 1ère victoire — débloque Inventaire
   {
     step: 1,
-    unlocked: ['map', 'inventory'],
+    unlocked: null, // null = tout débloqué
     requires: { victories: 1 },
     notification: {
-      title: 'Inventaire débloqué !',
-      icon: '🎒',
-      text: 'Vous avez gagné votre première Rune de Boost ! Allez dans <strong>Inventaire</strong> pour l\'équiper sur votre équipe.',
-      newButtons: ['inventory'],
-    },
-  },
-  // Étape 2 : 2 victoires — débloque Coffres + Missions
-  {
-    step: 2,
-    unlocked: ['map', 'inventory', 'chests', 'missions'],
-    requires: { victories: 2 },
-    notification: {
-      title: 'Nouvelles fonctions !',
-      icon: '📦',
-      text: '<strong>Coffres</strong> : achetez des runes ciblées avec vos gemmes.<br><strong>Missions</strong> : objectifs quotidiens pour gagner plus de gemmes.',
-      newButtons: ['chests', 'missions'],
-    },
-  },
-  // Étape 3 : 3 victoires — débloque Invocation + Équipe + Collection
-  {
-    step: 3,
-    unlocked: ['map', 'inventory', 'chests', 'missions', 'summon', 'team', 'collection'],
-    requires: { victories: 3 },
-    notification: {
-      title: 'Le Gacha est ouvert !',
-      icon: '✨',
-      text: '<strong>Invocation</strong> : invoquez des héros légendaires (5 gemmes / pull).<br><strong>Équipe</strong> : assignez vos héros à votre escouade pour booster leurs stats.<br><strong>Collection</strong> : votre Pokédex de héros.',
-      newButtons: ['summon', 'team', 'collection'],
-    },
-  },
-  // Étape 4 : 5 victoires — débloque Talents + Donjons + Achievements
-  {
-    step: 4,
-    unlocked: ['map', 'inventory', 'chests', 'missions', 'summon', 'team', 'collection', 'talents', 'dungeons', 'achievements'],
-    requires: { victories: 5 },
-    notification: {
-      title: 'Mode Avancé !',
-      icon: '🌳',
-      text: '<strong>Talents</strong> : spécialisez vos unités (3 branches par classe).<br><strong>Donjons</strong> : combat tour par tour stratégique style Dofus.<br><strong>Achievements</strong> : 20 défis avec récompenses.',
-      newButtons: ['talents', 'dungeons', 'achievements'],
-    },
-  },
-  // Étape 5 : 10 victoires — tout débloqué + message final
-  {
-    step: 5,
-    unlocked: null, // null = pas de restriction
-    requires: { victories: 10 },
-    notification: {
-      title: 'Tout est débloqué !',
-      icon: '🏆',
-      text: 'Vous maîtrisez les bases du jeu. Le <strong>Prestige</strong> est votre prochain objectif : réinitialisez votre progression contre des bonus permanents puissants.',
-      newButtons: ['prestige', 'stats'],
+      title: 'Toutes les fonctions débloquées !',
+      icon: '🎉',
+      text: `Bravo pour votre première victoire ! Vous avez maintenant accès à tout :
+<br><br>
+<strong>🎒 Inventaire</strong> : équipez vos Runes de Boost<br>
+<strong>📦 Coffres</strong> : achetez des runes ciblées<br>
+<strong>✨ Invocation</strong> : invoquez des héros légendaires<br>
+<strong>👥 Équipe</strong> : composez votre escouade<br>
+<strong>📋 Missions</strong> : gagnez des gemmes quotidiennement<br>
+<strong>🌳 Talents</strong> : spécialisez vos unités<br>
+<strong>🗡 Donjons</strong> : combat tour par tour stratégique<br>
+<strong>🏆 Achievements</strong> : 20 défis à relever<br>
+<br>Explorez à votre rythme !`,
+      newButtons: ['inventory', 'chests', 'summon', 'team', 'missions', 'talents', 'dungeons', 'achievements', 'collection', 'prestige', 'stats'],
     },
   },
 ];
