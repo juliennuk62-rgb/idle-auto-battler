@@ -2,7 +2,8 @@
 // Singleton pur JS. Émet des events pour que l'UI réagisse.
 
 import { BALANCE } from '../data/balance.js';
-import { generateItem, sellValue, RARITY_INDEX, deduplicateInventory } from '../data/items.js';
+import { generateItem, sellValue, RARITY_INDEX, deduplicateInventory, RARITIES } from '../data/items.js';
+import { ITEMS_EXTENDED } from '../data/items-extended.js';
 
 const STORAGE_KEY = 'idle_autobattler_inventory';
 
@@ -42,6 +43,16 @@ export class ItemSystemImpl {
 
     if (Math.random() > dropRate) return null;
 
+    // Boss kill → 40% chance de drop un item UNIQUE de ITEMS_EXTENDED
+    // (les items mythiques/légendaires scénarisés avec effets spéciaux).
+    if (isBoss && Math.random() < 0.4) {
+      const uniqueItem = this._rollBossUniqueItem();
+      if (uniqueItem) {
+        this._addToInventory(uniqueItem);
+        return uniqueItem;
+      }
+    }
+
     const item = generateItem(biomeId, wave);
     this._addToInventory(item);
 
@@ -53,6 +64,50 @@ export class ItemSystemImpl {
     }
 
     return item;
+  }
+
+  /**
+   * Pioche un item unique de ITEMS_EXTENDED pour un boss kill.
+   * Distribution : 60% epic, 30% legendary, 10% mythic.
+   * Chaque item est cloné avec un uid unique (on peut drop le même item plusieurs fois).
+   */
+  _rollBossUniqueItem() {
+    if (!ITEMS_EXTENDED || ITEMS_EXTENDED.length === 0) return null;
+
+    // Détermine la rareté du drop
+    const roll = Math.random();
+    let targetRarity;
+    if (roll < 0.10)      targetRarity = 'mythic';
+    else if (roll < 0.40) targetRarity = 'legendary';
+    else                   targetRarity = 'epic';
+
+    // Filtre les items de cette rareté
+    let pool = ITEMS_EXTENDED.filter(i => i.rarity === targetRarity);
+    if (pool.length === 0) pool = ITEMS_EXTENDED; // fallback tout le pool
+
+    // Pioche au hasard
+    const template = pool[Math.floor(Math.random() * pool.length)];
+    const rarityInfo = RARITIES.find(r => r.id === template.rarity) || RARITIES[RARITIES.length - 1];
+
+    // Clone avec uid unique + format compatible inventaire
+    return {
+      uid: `i_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      templateId: template.id,
+      name: template.name,
+      type: template.slot === 'trinket' ? 'accessory' : (template.slot || 'weapon'),
+      set: null, // items uniques n'appartiennent à aucun set
+      icon: { weapon: '⚔', armor: '🛡', accessory: '💎' }[template.slot === 'trinket' ? 'accessory' : template.slot] || '✦',
+      tier: template.level || 1,
+      rarity: template.rarity,
+      rarityColor: rarityInfo.color,
+      rarityName: rarityInfo.name,
+      stats: { ...template.stats },
+      enchants: [], // les items uniques ont des effets intégrés, pas d'enchants
+      effect: template.effect || null,
+      flavor: template.flavor || null,
+      equippedOn: null,
+      isUnique: true, // flag pour distinguer des items procéduraux
+    };
   }
 
   /**

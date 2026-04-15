@@ -23,7 +23,7 @@ import { PrestigeSystem } from './PrestigeSystem.js';
 import { computeXpReward } from './Progression.js';
 import { BALANCE } from '../data/balance.js';
 import { biomeForWave } from '../data/biomes.js';
-import { pickMonster, monsterCountForWave } from '../data/monsters.js';
+import { pickMonster, monsterCountForWave, getScriptedBoss } from '../data/monsters.js';
 import { Fighter } from '../entities/Fighter.js';
 import { ItemSystem } from './ItemSystem.js';
 
@@ -503,6 +503,16 @@ export class CombatSystem {
         this.scene.time.delayedCall(250, () => {
           this.scene.time.timeScale = 1;
         });
+
+        // Dialogue de défaite du boss scénarisé (si présent)
+        if (target._dialogueDefeat && this.scene.waveBanner) {
+          this.scene.time.delayedCall(600, () => {
+            this.scene.waveBanner.show('VAINCU', `"${target._dialogueDefeat}"`, {
+              holdMs: 3000,
+              borderColor: 0x22c55e,
+            });
+          });
+        }
       }
     }
 
@@ -808,9 +818,14 @@ export class CombatSystem {
     // Positions empilées verticalement à droite.
     const positions = this._monsterPositions(count);
 
+    // Boss scénarisé ? Vérifie si un boss du content-atelier matche ce biome + wave.
+    const scriptedBoss = isBoss ? getScriptedBoss(biome.id, wave) : null;
+
     for (let i = 0; i < count; i++) {
-      const monsterInfo = pickMonster(biome.id, isBoss);
-      // Grossit les monstres : ×1.3 si sprite dédié, ×3 si fallback (tkobold).
+      // Si boss scénarisé disponible, utiliser ses stats/nom au lieu du procédural.
+      const monsterInfo = (scriptedBoss && isBoss)
+        ? { name: scriptedBoss.name, spriteKey: 'monster', spriteScale: 3 }
+        : pickMonster(biome.id, isBoss);
       const scale = monsterInfo.spriteScale === 1 ? 1.3 : monsterInfo.spriteScale;
       const m = new Fighter(this.scene, positions[i].x, positions[i].y, {
         ...BALANCE.monster,
@@ -820,7 +835,15 @@ export class CombatSystem {
         color: 0xef4444,
         facing: -1,
       });
-      m.rescaleStats({ hp: hpPerMob, atk: atkPerMob });
+
+      // Boss scénarisé : override les stats procédurales avec celles définies par le game designer
+      if (scriptedBoss && isBoss) {
+        m.rescaleStats({ hp: scriptedBoss.hp, atk: scriptedBoss.atk });
+        m._dialogueIntro = scriptedBoss.dialogueIntro;
+        m._dialogueDefeat = scriptedBoss.dialogueDefeat;
+      } else {
+        m.rescaleStats({ hp: hpPerMob, atk: atkPerMob });
+      }
       m.setBossVisual(isBoss);
 
       // Pop-in animé : on set invisible puis respawn tween.
@@ -830,6 +853,14 @@ export class CombatSystem {
 
       this.teamB.push(m);
       this._startAttackTimer(m, this.teamA);
+    }
+
+    // Dialogue d'intro du boss scénarisé (via la bannière de vague)
+    if (scriptedBoss && isBoss && this.scene.waveBanner) {
+      this.scene.waveBanner.show(scriptedBoss.name, `"${scriptedBoss.dialogueIntro}"`, {
+        holdMs: 3000,
+        borderColor: 0xff4444,
+      });
     }
 
     // Shake caméra + flash rouge à l'apparition d'un boss (dramatise l'arrivée).

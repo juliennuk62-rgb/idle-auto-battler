@@ -32,6 +32,7 @@ import { MissionToast } from './ui/MissionToast.js';
 import { LeaderboardSystem } from './systems/LeaderboardSystem.js';
 import { ConsentBanner } from './ui/ConsentBanner.js';
 import { MultiTabGuard } from './utils/MultiTabGuard.js';
+import { OpeningScreen } from './screens/OpeningScreen.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
@@ -190,14 +191,27 @@ async function boot() {
     setTimeout(() => toast.remove(), 4000);
   });
 
-  // Démarre au menu principal.
-  navigateTo('menu');
-
-  // Check daily login reward.
-  const dailyCheck = DailySystem.checkLogin();
-  if (dailyCheck.canClaim) {
-    const popup = new DailyRewardPopup();
-    popup.show();
+  // Opening cinématique — première fois seulement (flag localStorage).
+  // Après l'opening → menu principal comme d'habitude.
+  if (!OpeningScreen.isDone()) {
+    const opening = new OpeningScreen(() => {
+      navigateTo('menu');
+      // Check daily reward après l'opening (pas pendant — le joueur est occupé)
+      const dailyCheck = DailySystem.checkLogin();
+      if (dailyCheck.canClaim) {
+        const popup = new DailyRewardPopup();
+        popup.show();
+      }
+    });
+    opening.show();
+  } else {
+    // Joueur revenant → menu direct + daily check
+    navigateTo('menu');
+    const dailyCheck = DailySystem.checkLogin();
+    if (dailyCheck.canClaim) {
+      const popup = new DailyRewardPopup();
+      popup.show();
+    }
   }
 }
 

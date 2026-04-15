@@ -12,6 +12,7 @@ export const RARITIES = [
   { id: 'rare',      name: 'Rare',        color: '#3b82f6', weight: 10, statMult: 2.0, enchants: 1 },
   { id: 'epic',      name: 'Épique',      color: '#a855f7', weight: 4,  statMult: 3.0, enchants: 2 },
   { id: 'legendary', name: 'Légendaire',  color: '#f97316', weight: 1,  statMult: 5.0, enchants: 2 },
+  { id: 'mythic',    name: 'Mythique',    color: '#ff6b9d', weight: 0,  statMult: 8.0, enchants: 3 },
 ];
 
 export const RARITY_INDEX = Object.fromEntries(RARITIES.map((r, i) => [r.id, i]));

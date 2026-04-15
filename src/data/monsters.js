@@ -75,6 +75,27 @@ export const MONSTER_POOLS = {
   },
 };
 
+// ── Boss scénarisés (content-atelier) ──────────────────────────────────────
+// 12 boss uniques avec dialogues et mécaniques (non-implémentées côté combat
+// pour l'instant — seuls nom, stats, dialogues sont utilisés).
+
+import { BOSSES_EXTENDED } from './bosses-extended.js';
+
+/**
+ * Cherche un boss scénarisé pour un biome + vague donnée.
+ * Retourne un objet enrichi { name, hp, atk, dialogueIntro, dialogueDefeat, ... } ou null.
+ *
+ * Chaque boss a un `triggerWave` qui indique la vague RELATIVE du biome (5 ou 10).
+ * La vague globale est convertie en vague locale (1-10 dans le biome).
+ */
+export function getScriptedBoss(biomeId, wave) {
+  if (!BOSSES_EXTENDED || BOSSES_EXTENDED.length === 0) return null;
+  // Vague locale dans le biome (chaque biome = 10 vagues)
+  const localWave = ((wave - 1) % 10) + 1;
+  // Cherche un boss scénarisé qui matche biome + vague locale
+  return BOSSES_EXTENDED.find(b => b.biome === biomeId && b.triggerWave === localWave) || null;
+}
+
 /**
  * Retourne un objet { name, spriteKey, spriteScale } pour un monstre.
  * Les entrées avec sprite dédié utilisent scale 1 (sprites 48px natifs).

@@ -2952,6 +2952,25 @@ li {
   text-shadow: 0 0 8px rgba(255,255,255,0.3);
 }
 
+/* Phrase signature du héros au reveal */
+.summon-reveal-speech {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: 8px 0;
+  padding: 0 20px;
+  line-height: 1.5;
+  max-width: 400px;
+  opacity: 0;
+  animation: speechFadeIn 800ms 1.2s ease-out forwards;
+}
+
+@keyframes speechFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .summon-reveal-class {
   font-family: var(--font-sans);
   font-size: 13px;
@@ -5967,6 +5986,129 @@ li {
     left: var(--space-2);
     max-width: none;
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   OPENING CINÉMATIQUE (first-time narrative)
+   ───────────────────────────────────────────────────────────── */
+
+.opening-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 1.2s ease-in-out;
+}
+
+.opening-content {
+  max-width: 650px;
+  width: 90%;
+  text-align: center;
+  animation: screenEnter 600ms ease-out;
+}
+
+.opening-scene-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-6);
+  letter-spacing: 2px;
+}
+
+.opening-text {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  color: var(--text-primary);
+  line-height: 1.8;
+  min-height: 120px;
+  cursor: pointer;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
+}
+
+.opening-controls {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.opening-skip {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms;
+}
+
+.opening-skip:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+.opening-next {
+  background: var(--gold);
+  color: #0a0a1e;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform 200ms, box-shadow 200ms;
+  animation: screenEnter 400ms ease-out;
+}
+
+.opening-next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4);
+}
+
+/* Choix moral (scène 5) */
+.opening-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+}
+
+.opening-choices-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.opening-choice {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: background 200ms, border-color 200ms, transform 200ms;
+}
+
+.opening-choice:hover {
+  background: rgba(251, 191, 36, 0.18);
+  border-color: var(--gold);
+  transform: translateX(6px);
+}
+
+.opening-choice-label {
+  display: block;
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.opening-choice-desc {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 /* Très petits écrans (phones portrait < 480px) — passes plus agressives */

@@ -117,6 +117,13 @@ export class SummonScreen {
     const rarityInfo = HERO_RARITIES[r.rarity];
     const duration = r.rarity === 'UR' ? 2500 : r.rarity === 'SSR' ? 2000 : r.rarity === 'SR' ? 1200 : 800;
 
+    // Phrase de reveal du héros (si disponible)
+    let revealSpeech = '';
+    try {
+      const { getRevealSpeech } = await import('../data/revealSpeeches.js');
+      revealSpeech = getRevealSpeech(r.hero.id);
+    } catch {}
+
     overlay.innerHTML = `
       <div class="summon-stars-bg"></div>
       <div class="summon-meteor" style="--meteor-color:${rarityInfo.color};"></div>
@@ -125,6 +132,7 @@ export class SummonScreen {
         <div class="summon-reveal-hero">
           <div class="summon-reveal-rarity" style="color:${rarityInfo.color}">${rarityInfo.name}</div>
           <div class="summon-reveal-name">${r.hero.name}</div>
+          ${revealSpeech ? `<div class="summon-reveal-speech">"${revealSpeech}"</div>` : ''}
           <div class="summon-reveal-class">${r.hero.class}</div>
           ${r.isNew ? '<div class="summon-reveal-new">NOUVEAU !</div>' : '<div class="summon-reveal-dupe">Doublon</div>'}
         </div>
