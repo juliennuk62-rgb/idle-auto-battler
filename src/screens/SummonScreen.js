@@ -6,6 +6,7 @@ import { ResourceSystem } from '../systems/ResourceSystem.js';
 import { BALANCE } from '../data/balance.js';
 import { HEROES, HERO_RARITIES } from '../data/heroes.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
+import { getRevealSpeech } from '../data/revealSpeeches.js';
 
 export class SummonScreen {
   constructor(onNavigate) {
@@ -101,7 +102,7 @@ export class SummonScreen {
     this._animateResult(results, 0, overlay);
   }
 
-  async _animateResult(results, index, overlay) {
+  _animateResult(results, index, overlay) {
     if (index >= results.length) {
       // Fin — afficher le récap si multi-pull
       if (results.length > 1) {
@@ -117,14 +118,8 @@ export class SummonScreen {
     const rarityInfo = HERO_RARITIES[r.rarity];
     const duration = r.rarity === 'UR' ? 2500 : r.rarity === 'SSR' ? 2000 : r.rarity === 'SR' ? 1200 : 800;
 
-    // Phrase de reveal du héros (si disponible)
-    let revealSpeech = '';
-    try {
-      // Import statique en top de fichier serait plus propre, mais le fichier
-      // peut ne pas exister → on utilise un import dynamique non-bloquant.
-      const mod = await import('../data/revealSpeeches.js').catch(() => null);
-      if (mod) revealSpeech = mod.getRevealSpeech(r.hero.id);
-    } catch {}
+    // Phrase de reveal du héros (import statique en haut du fichier)
+    const revealSpeech = getRevealSpeech(r.hero.id) || '';
 
     overlay.innerHTML = `
       <div class="summon-stars-bg"></div>
