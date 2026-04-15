@@ -13,6 +13,7 @@ import { OnboardingSystem } from '../systems/OnboardingSystem.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
 import { Toast } from '../ui/ToastSystem.js';
 import { LeaderboardModal } from '../ui/LeaderboardModal.js';
+import { escapeHtml, safeImageUrl } from '../utils/escape.js';
 
 export class MenuScreen {
   constructor(onNavigate) {
@@ -161,9 +162,11 @@ export class MenuScreen {
     const user = AuthSystem.getUser();
     if (user) {
       const userDiv = this.el.querySelector('#menu-user');
+      const safePhoto = safeImageUrl(user.photoURL);
+      const safeName  = escapeHtml(user.displayName || user.email || 'Joueur');
       userDiv.innerHTML = `
-        ${user.photoURL ? `<img src="${user.photoURL}" class="menu-user-avatar" />` : ''}
-        <span>${user.displayName || user.email || 'Joueur'}</span>
+        ${safePhoto ? `<img src="${safePhoto}" class="menu-user-avatar" alt="" />` : ''}
+        <span>${safeName}</span>
         <button class="menu-logout-btn" id="menu-logout">Déconnexion</button>
       `;
       userDiv.querySelector('#menu-logout')?.addEventListener('click', async () => {

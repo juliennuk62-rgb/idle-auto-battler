@@ -6,6 +6,7 @@ import { DungeonCombatEngine } from '../systems/DungeonCombatEngine.js';
 import { DungeonFighter } from '../entities/DungeonFighter.js';
 import { DungeonUI } from '../ui/DungeonUI.js';
 import { GRID, GRID_COLORS } from '../data/dungeonConfig.js';
+import { GachaSystem } from '../systems/GachaSystem.js';
 
 export class DungeonCombatScene extends Phaser.Scene {
   constructor() {
@@ -124,14 +125,36 @@ export class DungeonCombatScene extends Phaser.Scene {
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  // TEST DATA — sera remplacé par les vraies données de donjon
+  // CRÉATION DES ÉQUIPES
   // ═══════════════════════════════════════════════════════════════════════
 
+  /**
+   * Récupère les infos d'un héros assigné via GachaSystem (nom + multiplicateur
+   * de stats selon la rareté). Si aucun héros assigné, renvoie des defaults.
+   */
+  _getSlotInfo(slotId, defaultName, baseHp, baseAtk) {
+    const mods = GachaSystem.getHeroModifiers(slotId);
+    const statMult = mods.statMult || 1;
+    return {
+      name: mods.heroName || defaultName,
+      hp: Math.round(baseHp * statMult),
+      atk: Math.round(baseAtk * statMult),
+      heroPassifs: mods.passifs || [],
+    };
+  }
+
   _createTestPlayerTeam() {
+    // Lit les slots assignés via GachaSystem (slot_1..slot_5) pour que les héros
+    // invoqués apparaissent aussi dans le donjon. Stats boostées selon rareté.
+    const warriorInfo = this._getSlotInfo('slot_1', 'Guerrier', 200, 25);
+    const archerInfo  = this._getSlotInfo('slot_3', 'Archer',   100, 35);
+    const mageInfo    = this._getSlotInfo('slot_4', 'Mage',     120, 40);
+    const healerInfo  = this._getSlotInfo('slot_5', 'Soigneur', 110, 20);
+
     return [
       new DungeonFighter({
-        name: 'Guerrier', class: 'warrior', isPlayer: true,
-        hp: 200, atk: 25, gridCol: 1, gridRow: 3,
+        name: warriorInfo.name, class: 'warrior', isPlayer: true,
+        hp: warriorInfo.hp, atk: warriorInfo.atk, gridCol: 1, gridRow: 3,
         spriteKey: 'warrior',
         abilities: [
           { id: 'strike', name: 'Frappe', paCost: 3, minRange: 1, maxRange: 1,
@@ -145,8 +168,8 @@ export class DungeonCombatScene extends Phaser.Scene {
         ],
       }),
       new DungeonFighter({
-        name: 'Archer', class: 'archer', isPlayer: true,
-        hp: 100, atk: 35, gridCol: 0, gridRow: 2,
+        name: archerInfo.name, class: 'archer', isPlayer: true,
+        hp: archerInfo.hp, atk: archerInfo.atk, gridCol: 0, gridRow: 2,
         spriteKey: 'archer',
         abilities: [
           { id: 'arrow', name: 'Tir', paCost: 3, minRange: 2, maxRange: 6,
@@ -155,8 +178,8 @@ export class DungeonCombatScene extends Phaser.Scene {
         ],
       }),
       new DungeonFighter({
-        name: 'Mage', class: 'mage', isPlayer: true,
-        hp: 120, atk: 40, gridCol: 0, gridRow: 4,
+        name: mageInfo.name, class: 'mage', isPlayer: true,
+        hp: mageInfo.hp, atk: mageInfo.atk, gridCol: 0, gridRow: 4,
         spriteKey: 'mage',
         abilities: [
           { id: 'arcane', name: 'Trait arcanique', paCost: 3, minRange: 1, maxRange: 5,
@@ -168,8 +191,8 @@ export class DungeonCombatScene extends Phaser.Scene {
         ],
       }),
       new DungeonFighter({
-        name: 'Healer', class: 'healer', isPlayer: true,
-        hp: 110, atk: 20, gridCol: 0, gridRow: 5,
+        name: healerInfo.name, class: 'healer', isPlayer: true,
+        hp: healerInfo.hp, atk: healerInfo.atk, gridCol: 0, gridRow: 5,
         spriteKey: 'healer',
         abilities: [
           { id: 'heal', name: 'Soin', paCost: 3, minRange: 1, maxRange: 4,

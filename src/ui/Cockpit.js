@@ -20,6 +20,7 @@ import { InventoryModal } from './InventoryModal.js';
 import { AdminPanel } from './AdminPanel.js';
 import { ItemSystem } from '../systems/ItemSystem.js';
 import { AuthSystem } from '../systems/AuthSystem.js';
+import { escapeHtml, safeImageUrl } from '../utils/escape.js';
 
 // Helper pour accéder à ItemSystem dans les sublabels sans import circulaire.
 function require_itemsystem() { return { ItemSystem }; }
@@ -129,9 +130,11 @@ export class Cockpit {
     if (userInfo) {
       const userSection = document.createElement('div');
       userSection.className = 'topbar-user';
+      const safePhoto = safeImageUrl(userInfo.photoURL);
+      const safeName  = escapeHtml(userInfo.displayName || userInfo.email || 'Joueur');
       userSection.innerHTML = `
-        ${userInfo.photoURL ? `<img class="topbar-user-avatar" src="${userInfo.photoURL}" alt="" />` : ''}
-        <span class="topbar-user-name">${userInfo.displayName || userInfo.email || 'Joueur'}</span>
+        ${safePhoto ? `<img class="topbar-user-avatar" src="${safePhoto}" alt="" />` : ''}
+        <span class="topbar-user-name">${safeName}</span>
       `;
       this.topBar.append(userSection);
     }

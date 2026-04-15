@@ -365,6 +365,14 @@ export class CombatSystem {
     // Détection "gros coup" : >= 25% HP max de la cible → hit-stop + floating damage agrandi
     const dmgRatio = actualDamage / Math.max(1, target.maxHp);
     const isBigHit = dmgRatio >= 0.25;
+    const isMassiveCrit = dmgRatio >= 0.5; // critique massif = 50%+ HP en un coup
+
+    // Narrator RNG : commentaire sur les crits dévastateurs
+    if (isMassiveCrit && this.teamA.includes(attacker)) {
+      import('./NarratorSystem.js').then(({ NarratorSystem }) => {
+        NarratorSystem.onMassiveCrit();
+      }).catch(() => {});
+    }
 
     // Hit-stop sur gros coup : le temps fige brièvement (80ms) pour amplifier l'impact.
     // Throttle : pas plus d'un hit-stop toutes les 400ms pour éviter le spam.
@@ -584,6 +592,10 @@ export class CombatSystem {
             // Item auto-vendu — track l'or récupéré (sellValue ~ 50% du gold value)
             this._biomeStats.autoSoldCount = (this._biomeStats.autoSoldCount || 0) + 1;
           }
+          // Narrator RNG : commentaire sur le loot (rare/épique/légendaire surtout)
+          import('./NarratorSystem.js').then(({ NarratorSystem }) => {
+            NarratorSystem.onLoot({ rarity: lootItem.rarity });
+          }).catch(() => {});
         }
         if (lootItem && this.scene.floatingDamage) {
           this.scene.floatingDamage.spawn(

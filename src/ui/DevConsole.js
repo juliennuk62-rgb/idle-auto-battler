@@ -12,9 +12,27 @@ import { generateItem } from '../data/items.js';
 
 const STORAGE_KEY_DUNGEON = 'idle_autobattler_dungeon_run';
 
+// Détecte si on tourne en environnement de dev (localhost) ou en prod (GitHub Pages, etc.).
+// En prod, DevConsole est désactivée pour éviter les exploits triviaux via la console.
+// Override : tape `localStorage.setItem('dev_console_force', '1')` pour forcer l'activation.
+function isDevEnv() {
+  try {
+    if (localStorage.getItem('dev_console_force') === '1') return true;
+  } catch {}
+  const host = (typeof location !== 'undefined' && location.hostname) || '';
+  return host === 'localhost' || host === '127.0.0.1' || host === '' || host.endsWith('.local');
+}
+
 export class DevConsole {
   constructor() {
     this.visible = false;
+    // Prod safety : ne pas monter l'UI ni binder les hotkeys en production.
+    // L'utilisateur peut toujours forcer via localStorage.setItem('dev_console_force', '1').
+    if (!isDevEnv()) {
+      this._devMode = false;
+      return;
+    }
+    this._devMode = true;
     this._create();
     this._bindHotkey();
   }

@@ -67,6 +67,7 @@ export class GachaSystemImpl {
    */
   _roll(minRarity) {
     let rarity = this._rollRarity();
+    let wasPity = false;
 
     // Force une rareté minimum si demandée.
     if (minRarity) {
@@ -81,6 +82,7 @@ export class GachaSystemImpl {
       if (this.pitySSR >= BALANCE.gacha.pitySSR) {
         rarity = 'SSR';
         this.pitySSR = 0;
+        wasPity = true;
       }
     } else if (rarity === 'SSR' || rarity === 'UR') {
       this.pitySSR = 0;
@@ -92,6 +94,7 @@ export class GachaSystemImpl {
       if (this.pityUR >= BALANCE.gacha.pityUR) {
         rarity = 'UR';
         this.pityUR = 0;
+        wasPity = true;
       }
     } else {
       this.pityUR = 0;
@@ -103,6 +106,12 @@ export class GachaSystemImpl {
 
     const isNew = !this.ownedHeroes.includes(hero.id);
     if (isNew) this.ownedHeroes.push(hero.id);
+
+    // Narrator RNG : commentaire contextuel sur le pull (async import pour éviter
+    // de créer un import circulaire entre NarratorSystem → GachaSystem).
+    import('./NarratorSystem.js').then(({ NarratorSystem }) => {
+      NarratorSystem.onPull({ rarity, isPity: wasPity });
+    }).catch(() => {});
 
     return {
       hero,
