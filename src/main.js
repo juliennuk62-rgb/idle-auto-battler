@@ -31,6 +31,7 @@ import { MissionScreen } from './screens/MissionScreen.js';
 import { MissionToast } from './ui/MissionToast.js';
 import { LeaderboardSystem } from './systems/LeaderboardSystem.js';
 import { ConsentBanner } from './ui/ConsentBanner.js';
+import { MultiTabGuard } from './utils/MultiTabGuard.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
@@ -166,6 +167,10 @@ async function boot() {
   // Bandeau RGPD minimal — s'affiche une seule fois pour un test fermé.
   const consentBanner = new ConsentBanner();
   consentBanner.show();
+
+  // Guard multi-onglets : détecte les sessions concurrentes et prévient l'utilisateur.
+  // Évite que 2 onglets ouverts n'écrasent mutuellement leurs sauvegardes.
+  MultiTabGuard.start();
 
   // Console admin (F9) — accessible partout
   new DevConsole();

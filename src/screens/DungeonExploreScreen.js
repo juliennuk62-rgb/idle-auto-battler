@@ -5,6 +5,7 @@
 import { attachGuideButton } from '../ui/GuideModal.js';
 import { ResourceSystem } from '../systems/ResourceSystem.js';
 import { MissionSystem } from '../systems/MissionSystem.js';
+import { AchievementSystem } from '../systems/AchievementSystem.js';
 import { InventoryModal } from '../ui/InventoryModal.js';
 
 const ROOMS = [
@@ -213,8 +214,17 @@ export class DungeonExploreScreen {
       this.state.totalGems = (this.state.totalGems || 0) + gems;
       this.state.totalKills += result.kills || 0;
 
-      // Mission tracking
+      // Mission tracking + Achievement tracking (FIX : le donjon trackait pas avant)
       MissionSystem.track('dungeon_floors', 1);
+      if (result.kills) {
+        MissionSystem.track('kills', result.kills);
+        AchievementSystem.increment('kills', result.kills);
+      }
+      if (room.isBoss) {
+        MissionSystem.track('boss_kills', 1);
+        AchievementSystem.increment('boss_kills');
+      }
+      if (gold > 0) AchievementSystem.increment('total_gold', gold);
 
       const allCleared = this.state.roomsCleared.every(c => c);
       if (allCleared) {
@@ -224,6 +234,8 @@ export class DungeonExploreScreen {
         this.state.totalGold += COMPLETION_BONUS.gold;
         this.state.totalGems = (this.state.totalGems || 0) + COMPLETION_BONUS.gems;
         MissionSystem.track('dungeon_clears', 1);
+        AchievementSystem.increment('dungeon_clears');
+        AchievementSystem.increment('total_gold', COMPLETION_BONUS.gold);
       } else {
         this.state.showChoice = true;
       }

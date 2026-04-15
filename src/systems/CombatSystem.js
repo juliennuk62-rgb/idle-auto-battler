@@ -100,6 +100,10 @@ export class CombatSystem {
     const activeSynergies = SynergySystem.apply(this.teamA);
     this._activeSynergies = activeSynergies;
 
+    // FIX Launch Checklist : applique les AURAS d'équipe (passifs qui affectent toute la team).
+    // Paladin Céleste SSR : teamHpPercent +20% HP max à tous les alliés.
+    this._applyTeamAuras();
+
     // Affiche les synergies actives via la bannière
     if (activeSynergies.length > 0 && this.scene.waveBanner) {
       const names = activeSynergies.map(s => `${s.icon} ${s.label}`).join(' · ');
@@ -111,6 +115,31 @@ export class CombatSystem {
     // Timers teamB : démarrés par _spawnWaveMonsters() (qui gère aussi
     // le respawn à chaque transition de vague). Pas de double-démarrage.
     for (const f of this.teamA) this._startAttackTimer(f, this.teamB);
+  }
+
+  /**
+   * Applique les auras d'équipe (passifs qui affectent toute la team).
+   * Séparé de SynergySystem car c'est des passifs hero-specific, pas des synergies de classe.
+   */
+  _applyTeamAuras() {
+    // Cumule les bonus de team aura de tous les héros
+    let teamHpPercent = 0;
+    for (const f of this.teamA) {
+      if (f.heroPassifs?.teamHpPercent) {
+        teamHpPercent += f.heroPassifs.teamHpPercent;
+      }
+    }
+
+    // Applique à tous les membres de l'équipe
+    if (teamHpPercent > 0) {
+      for (const f of this.teamA) {
+        if (!f.isAlive) continue;
+        const hpBoost = Math.round(f.maxHp * teamHpPercent / 100);
+        f.maxHp += hpBoost;
+        f.hp += hpBoost;
+        if (f._updateHealthBar) f._updateHealthBar();
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -300,11 +329,28 @@ export class CombatSystem {
       dmg = Math.round(dmg * attacker.heroPassifs.aoeMult);
     }
 
+    // Passif dualElement (Seigneur des Éléments SSR) : AoE brûle ET gèle en alternance.
+    // Version simplifiée (sans système de status effects) : +30% dégâts sur AoE.
+    if (attacker.abilityType === 'aoe' && attacker.heroPassifs?.dualElement) {
+      dmg = Math.round(dmg * 1.3);
+    }
+
     // Passif armorPen (Tireur d'Élite SSR) : ignore 30% des défenses
     // (réduit la résistance effective de la cible)
     if (attacker.heroPassifs?.armorPen && target.heroPassifs) {
       // Pour l'instant pas de système d'armure, le bonus augmente les dégâts de 30%
       dmg = Math.round(dmg * (1 + attacker.heroPassifs.armorPen / 100));
+    }
+
+    // Passif critDmgBonus (Artémis UR) : +100% dégâts sur les "gros coups".
+    // Le mode aventure n'a pas de crit système classique, mais on considère les coups
+    // dans le top 15% de variance comme des "critiques" (variance aléatoire > 1.1).
+    // On recalcule la variance pour détecter : si base * variance > base * 1.1, c'est un crit.
+    if (attacker.heroPassifs?.critDmgBonus) {
+      // Simple heuristique : 15% de chance de crit pour Artémis, avec le bonus
+      if (Math.random() < 0.15) {
+        dmg = Math.round(dmg * (1 + attacker.heroPassifs.critDmgBonus / 100));
+      }
     }
 
     const hpBefore = target.hp;

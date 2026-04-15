@@ -573,8 +573,19 @@ export class DungeonCombatScene extends Phaser.Scene {
 
     overlay.querySelector('#dui-result-back').addEventListener('click', () => {
       this.dungeonUI.destroy();
+      // Enrichit le result avec les HP restants + le nombre de kills (pour persister
+      // entre salles + track achievements/missions proprement).
+      const heroHp = {};
+      let kills = 0;
+      if (this.engine) {
+        for (const f of this.engine.playerTeam || []) {
+          heroHp[f.id] = Math.max(0, f.hp || 0);
+        }
+        // Kills = ennemis morts
+        kills = (this.engine.enemyTeam || []).filter(f => !f.isAlive).length;
+      }
       const onEnd = this.game.registry.get('onDungeonCombatEnd');
-      if (onEnd) onEnd({ victory: isVictory });
+      if (onEnd) onEnd({ victory: isVictory, heroHp, kills });
     });
   }
 
