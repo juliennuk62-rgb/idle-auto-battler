@@ -5992,6 +5992,25 @@ li {
    OPENING CINÉMATIQUE (first-time narrative)
    ───────────────────────────────────────────────────────────── */
 
+/* ─── Event badge dans le topbar ─── */
+.topbar-event-badge {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--gold);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 1px;
+  animation: eventBadgePulse 3s ease-in-out infinite alternate;
+  cursor: help;
+}
+
+@keyframes eventBadgePulse {
+  0%   { box-shadow: 0 0 0px rgba(251, 191, 36, 0); }
+  100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+}
+
 .opening-screen {
   display: flex;
   align-items: center;

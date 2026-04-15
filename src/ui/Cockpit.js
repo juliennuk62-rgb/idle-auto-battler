@@ -84,6 +84,18 @@ export class Cockpit {
     title.textContent = 'IDLE · AUTO-BATTLER';
     this.topBar.append(title);
 
+    // Bandeau événement actif (s'il y en a un)
+    import('../systems/EventSystem.js').then(({ EventSystem }) => {
+      const label = EventSystem.getActiveLabel();
+      if (label) {
+        const eventBadge = document.createElement('div');
+        eventBadge.className = 'topbar-event-badge';
+        eventBadge.textContent = `🎉 ${label}`;
+        eventBadge.title = EventSystem.getActiveBanners().map(b => b.modifiers.join(', ')).join('\n') || label;
+        this.topBar.insertBefore(eventBadge, title.nextSibling);
+      }
+    }).catch(() => {});
+
     const resources = document.createElement('div');
     resources.className = 'topbar-section resources';
     this.topBar.append(resources);

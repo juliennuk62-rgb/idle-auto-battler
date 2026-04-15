@@ -3,6 +3,10 @@
 // Les IDs matchent heroes.js exactement.
 
 export const REVEAL_SPEECHES = {
+  // ── MYTHIQUES ──
+  titan_originel:   'Je suis le premier. Et le dernier.',
+  chrono_mage:      'Le temps est un cercle. Et je suis son centre.',
+
   // ── WARRIORS ──
   garde_royal:      'Mon bouclier est votre rempart. Ma vie, votre garantie.',
   centurion:        'Mille batailles. Aucune défaite. Pas aujourd\'hui.',

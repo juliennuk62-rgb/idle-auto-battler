@@ -33,6 +33,7 @@ import { LeaderboardSystem } from './systems/LeaderboardSystem.js';
 import { ConsentBanner } from './ui/ConsentBanner.js';
 import { MultiTabGuard } from './utils/MultiTabGuard.js';
 import { OpeningScreen } from './screens/OpeningScreen.js';
+import { EventSystem } from './systems/EventSystem.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
@@ -172,6 +173,10 @@ async function boot() {
   // Guard multi-onglets : détecte les sessions concurrentes et prévient l'utilisateur.
   // Évite que 2 onglets ouverts n'écrasent mutuellement leurs sauvegardes.
   MultiTabGuard.start();
+
+  // EventSystem : scanne le calendrier des événements saisonniers/spéciaux.
+  // Active les modifiers (drop rate ×N, gold ×N) si un event est en cours.
+  EventSystem.init();
 
   // Console admin (F9) — accessible partout
   new DevConsole();

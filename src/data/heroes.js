@@ -3,10 +3,11 @@
 // meilleur qu'une Recrue. statMult s'applique sur les stats de base de la classe.
 
 export const HERO_RARITIES = {
-  R:   { name: 'Rare',        color: '#3b82f6', mult: 1.2, rate: 70, passifs: 0 },
-  SR:  { name: 'Super Rare',  color: '#a855f7', mult: 1.5, rate: 20, passifs: 0 },
-  SSR: { name: 'SSR',         color: '#fbbf24', mult: 2.0, rate: 8,  passifs: 1 },
-  UR:  { name: 'Ultra Rare',  color: '#ef4444', mult: 3.0, rate: 2,  passifs: 2 },
+  R:      { name: 'Rare',        color: '#3b82f6', mult: 1.2, rate: 69.99, passifs: 0 },
+  SR:     { name: 'Super Rare',  color: '#a855f7', mult: 1.5, rate: 20,    passifs: 0 },
+  SSR:    { name: 'SSR',         color: '#fbbf24', mult: 2.0, rate: 8,     passifs: 1 },
+  UR:     { name: 'Ultra Rare',  color: '#ef4444', mult: 3.0, rate: 2,     passifs: 2 },
+  MYTHIC: { name: 'Mythique',    color: '#ff6b9d', mult: 5.0, rate: 0.01,  passifs: 3 },
 };
 
 export const HEROES = [
@@ -56,6 +57,20 @@ export const HEROES = [
     passifs: [
       { id: 'heal_dmg', name: 'Soin offensif', desc: 'Les soins infligent aussi 50% en dégâts', effect: { healDamage: 50 } },
       { id: 'revive_inf', name: 'Résurrection infinie', desc: 'Revit tous les alliés morts', effect: { infiniteRevive: true } },
+    ] },
+
+  // ── MYTHIQUES (0.01% — légendes ultimes) ──────────────────────
+  { id: 'titan_originel',    name: 'Titan Originel',     class: 'warrior', rarity: 'MYTHIC', lore: 'Le premier guerrier. Celui qui a forgé le monde avec ses poings.',
+    passifs: [
+      { id: 'immortalite', name: 'Immortalité', desc: 'Ne peut pas mourir (HP min 1)', effect: { lastStand: true, permanentTaunt: true } },
+      { id: 'colosse', name: 'Colosse', desc: '+50% HP à toute l\'équipe', effect: { teamHpPercent: 50 } },
+      { id: 'seisme', name: 'Séisme', desc: 'AoE ×3 sur chaque attaque', effect: { aoeMult: 3 } },
+    ] },
+  { id: 'chrono_mage',      name: 'Chronomancien',      class: 'mage',    rarity: 'MYTHIC', lore: 'Il a lu la dernière page du temps. Et l\'a réécrite.',
+    passifs: [
+      { id: 'temps_arrete', name: 'Temps arrêté', desc: 'AoE ×8 ATK une fois par combat', effect: { aoeMult: 8 } },
+      { id: 'prevision', name: 'Prévision', desc: '+200% dégâts critiques', effect: { critDmgBonus: 200 } },
+      { id: 'boucle_temp', name: 'Boucle temporelle', desc: 'Résurrection infinie de tous les alliés', effect: { infiniteRevive: true } },
     ] },
 ];
 

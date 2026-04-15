@@ -15,6 +15,7 @@ export class GachaSystemImpl {
     this.assignedHeroes = {}; // { fighterId: heroId } — qui utilise quel héros
     this.pitySSR = 0;        // compteur pulls sans SSR
     this.pityUR = 0;         // compteur pulls sans UR
+    this.pityMYTHIC = 0;     // compteur pulls sans MYTHIC (pity à 200)
     this._load();
   }
 
@@ -89,19 +90,33 @@ export class GachaSystemImpl {
     }
 
     // Pity UR.
-    if (rarity !== 'UR') {
+    if (rarity !== 'UR' && rarity !== 'MYTHIC') {
       this.pityUR++;
       if (this.pityUR >= BALANCE.gacha.pityUR) {
         rarity = 'UR';
         this.pityUR = 0;
         wasPity = true;
       }
-    } else {
+    } else if (rarity === 'UR' || rarity === 'MYTHIC') {
       this.pityUR = 0;
     }
 
+    // Pity MYTHIC (200 pulls sans mythique → garanti).
+    if (rarity !== 'MYTHIC') {
+      this.pityMYTHIC++;
+      if (this.pityMYTHIC >= 200) {
+        rarity = 'MYTHIC';
+        this.pityMYTHIC = 0;
+        wasPity = true;
+      }
+    } else {
+      this.pityMYTHIC = 0;
+    }
+
     // Pioche un héros de cette rareté (random).
-    const pool = HEROES.filter(h => h.rarity === rarity);
+    let pool = HEROES.filter(h => h.rarity === rarity);
+    // Fallback si pool vide (rare edge case pour MYTHIC si pas de héros)
+    if (pool.length === 0) pool = HEROES.filter(h => h.rarity === 'UR');
     const hero = pool[Math.floor(Math.random() * pool.length)];
 
     const isNew = !this.ownedHeroes.includes(hero.id);
