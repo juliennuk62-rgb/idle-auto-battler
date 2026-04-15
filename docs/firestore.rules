@@ -2,19 +2,41 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Saves utilisateur (chaque joueur lit/ecrit son propre save)
+    // ─── Saves utilisateur ───
+    // Chaque joueur lit/ecrit uniquement son propre save.
+    // Size limit : 1 MB max par doc (evite abus).
     match /saves/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 1048576; // 1 MB
     }
 
-    // Leaderboard hebdomadaire
+    // ─── Leaderboard hebdomadaire ───
+    // Doc racine : read public, pas d'ecriture directe.
     match /leaderboards/{weekId} {
       allow read: if request.auth != null;
       allow write: if false;
 
+      // Sous-collections : chaque category contient les scores.
       match /{category}/{userId} {
+        // Lecture : tout utilisateur authentifie peut voir les classements.
         allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.uid == userId;
+
+        // Ecriture : seulement pour soi + validation sanity :
+        //   - score numerique >= 0
+        //   - score <= 10 000 000 (plafond anti-triche evidente)
+        //   - displayName string court (<= 50 chars)
+        //   - presence obligatoire des 3 champs score, displayName, updatedAt
+        //   - categorie parmi la liste blanche
+        allow write: if request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.score is number
+          && request.resource.data.score >= 0
+          && request.resource.data.score <= 10000000
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() <= 50
+          && category in ['kills', 'boss_kills', 'total_gold', 'max_wave', 'max_damage', 'deaths'];
       }
     }
   }

@@ -13,7 +13,11 @@
     "apply-fixed": "node scripts/apply-fixed.js",
     "content-atelier": "node scripts/content-atelier.js",
     "content-finisher": "node scripts/content-finisher.js",
-    "validate-content": "node scripts/validate-content.js"
+    "validate-content": "node scripts/validate-content.js",
+    "grand-rapport": "node scripts/grand-rapport.js",
+    "rapport-pdf": "python scripts/gen-rapport-pdf.py",
+    "rng-ritual": "node scripts/rng-ritual.js",
+    "rng-pdf": "python scripts/gen-rng-pdf.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.1"

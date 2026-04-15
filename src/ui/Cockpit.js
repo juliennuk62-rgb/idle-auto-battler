@@ -443,14 +443,27 @@ export class Cockpit {
   _mountSceneDependent(scene) {
     this._mountUnitCards();
     this._mountEnemyPanel();
+    this._mountSynergyBadges(scene);
     this._showOfflineRewardIfAny(scene);
 
     // Écoute les fusions pour remonter les cartes quand la team change.
     this._fusionUnsubscribe = TelemetrySystem.onBroadcast((event) => {
       if (event.type === 'unit_fused') {
         // Léger délai pour laisser CombatScene finir sa mutation.
-        setTimeout(() => this._remountUnitCards(), 50);
+        setTimeout(() => {
+          this._remountUnitCards();
+          // Les synergies peuvent changer après fusion : refresh
+          if (this.synergyBadges) this.synergyBadges.refresh();
+        }, 50);
       }
+    });
+  }
+
+  _mountSynergyBadges(scene) {
+    if (!this.leftCol || !scene || !scene.combat) return;
+    // Import dynamique pour ne pas charger le module si pas utilisé
+    import('./SynergyBadges.js').then(({ SynergyBadges }) => {
+      this.synergyBadges = new SynergyBadges(this.leftCol, { combat: scene.combat });
     });
   }
 

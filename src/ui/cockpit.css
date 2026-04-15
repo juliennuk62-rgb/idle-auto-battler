@@ -80,6 +80,43 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
+  margin-bottom: var(--space-3);
+}
+
+/* Label de section — "JOUER" / "PROGRESSION" / etc. */
+.menu-section-label {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  letter-spacing: 2px;
+  margin: var(--space-4) 0 var(--space-2) 4px;
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--border-subtle);
+  text-transform: uppercase;
+}
+
+/* La première section "JOUER" n'a pas de margin-top (elle colle au subtitle) */
+.menu-section-label:first-of-type {
+  margin-top: var(--space-2);
+}
+
+/* Section PRINCIPAL — boutons XL doré, 1 colonne pleine ou 2 cols avec emphasis */
+.menu-buttons-primary {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.menu-btn-xl {
+  padding: 18px 24px !important;
+  min-height: 72px;
+}
+
+.menu-btn-xl .menu-btn-icon {
+  font-size: 28px !important;
+}
+
+.menu-btn-xl .menu-btn-label {
+  font-size: 16px !important;
 }
 
 .menu-btn {
@@ -5708,4 +5745,240 @@ li {
 .lb-my-rank strong {
   color: var(--magic);
   font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RGPD consent banner (RGPD minimal pour test ferme)
+   ───────────────────────────────────────────────────────────── */
+
+.consent-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--bg-panel-hi);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  max-width: 620px;
+  width: calc(100% - 40px);
+  padding: var(--space-4);
+  z-index: 99999;
+  opacity: 0;
+  transition: transform 350ms var(--ease-emphasized), opacity 250ms ease-out;
+  font-family: var(--font-sans);
+}
+
+.consent-banner.consent-banner-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.consent-banner-body {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.consent-banner-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.consent-banner-text strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.consent-banner-text p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 var(--space-2) 0;
+}
+
+.consent-banner-detail {
+  font-size: 11px !important;
+  color: var(--text-tertiary) !important;
+}
+
+.consent-banner-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.consent-banner-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--duration-fast), transform var(--duration-fast);
+}
+
+.consent-banner-btn:hover { transform: translateY(-1px); }
+
+.consent-banner-btn-primary {
+  background: var(--gold);
+  color: #0a0a1a;
+}
+
+.consent-banner-btn-primary:hover {
+  background: #ffce4d;
+}
+
+@media (max-width: 600px) {
+  .consent-banner { width: calc(100% - 20px); bottom: 10px; padding: var(--space-3); }
+  .consent-banner-icon { font-size: 24px; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Synergy badges (affichage persistant pendant le combat)
+   Fix du "dark pattern involontaire" - synergies visibles en permanence
+   ───────────────────────────────────────────────────────────── */
+
+.synergy-badges {
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.synergy-badges-title {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--heal);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+  text-shadow: 0 0 4px rgba(34, 197, 94, 0.4);
+}
+
+.synergy-badges-empty {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  padding: var(--space-1) 0;
+}
+
+.synergy-badges-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.synergy-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.02));
+  border-left: 2px solid var(--heal);
+  border-radius: var(--radius-sm);
+  cursor: help;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.synergy-badge:hover {
+  transform: translateX(2px);
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.25), rgba(34, 197, 94, 0.05));
+}
+
+.synergy-badge-icon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.synergy-badge-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE RESPONSIVE (corrections audit Mobile Reviewer)
+   Breakpoint principal : <= 768px
+   ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Menu : 1 colonne, boutons plus gros (44px min iOS HIG) */
+  .menu-buttons { grid-template-columns: 1fr; gap: 10px; }
+  .menu-buttons-primary { grid-template-columns: 1fr; }
+  .menu-btn {
+    min-height: 56px;
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+  .menu-btn-xl {
+    min-height: 72px !important;
+    padding: 16px 20px !important;
+  }
+  .menu-btn-label { font-size: 14px; }
+  .menu-btn-icon { font-size: 22px; }
+
+  /* Title + subtitle un peu plus petits */
+  .menu-title { font-size: 20px; letter-spacing: 2px; }
+  .menu-subtitle { font-size: 11px; margin-bottom: 20px; }
+  .menu-section-label { font-size: 9px; letter-spacing: 1.5px; margin-top: 18px; }
+
+  /* Cockpit : stack vertical si trop serré */
+  .cockpit {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto auto;
+    grid-template-areas:
+      'topbar'
+      'rightcol'
+      'center'
+      'leftcol'
+      'bottombar';
+  }
+  .cockpit-topbar     { grid-area: topbar; }
+  .cockpit-rightcol   { grid-area: rightcol; max-height: 180px; overflow-y: auto; }
+  .cockpit-leftcol    { grid-area: leftcol;  max-height: 220px; overflow-y: auto; }
+  .cockpit-center     { grid-area: center; }
+  .cockpit-bottombar  { grid-area: bottombar; }
+
+  /* Resource counters : tailles touch-friendly */
+  .resource-counter {
+    padding: 10px 14px;
+    min-height: 40px;
+    min-width: 80px;
+    font-size: 13px;
+  }
+
+  /* Modals : pleine largeur */
+  .modal-panel { max-width: 95vw !important; max-height: 90vh; }
+
+  /* Toasts en bas plutôt qu'en haut (plus naturel mobile) */
+  .toast-stack {
+    top: auto;
+    bottom: var(--space-3);
+    right: var(--space-2);
+    left: var(--space-2);
+    max-width: none;
+  }
+}
+
+/* Très petits écrans (phones portrait < 480px) — passes plus agressives */
+@media (max-width: 480px) {
+  .menu-container { padding: 14px 8px; }
+  .menu-title { font-size: 18px; }
+  .menu-btn { padding: 12px 14px; }
+  .menu-btn-desc { font-size: 10px; }
+
+  .topbar-back-btn { padding: 6px 10px; font-size: 12px; }
+  .topbar-title { font-size: 12px; display: none; } /* cache le titre sur très petit */
+
+  /* Resource counters : plus compacts */
+  .resource-counter { padding: 8px 10px; font-size: 12px; }
 }

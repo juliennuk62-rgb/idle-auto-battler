@@ -214,7 +214,7 @@ export class UnitCard {
 
       if (item) {
         el.textContent = item.icon;
-        el.title = `🔒 ${item.name} (${item.rarityName})`;
+        el.title = this._buildItemTooltip(item);
         slotDiv.style.borderColor = item.rarityColor;
         slotDiv.classList.add('equipped');
         // Petit cadenas dans le coin.
@@ -234,6 +234,46 @@ export class UnitCard {
         if (lockEl) lockEl.remove();
       }
     }
+  }
+
+  /**
+   * Construit un tooltip descriptif riche pour un item équipé.
+   * Corrige le "dark pattern involontaire" identifié par l'UX audit :
+   * les bonus d'items étaient appliqués mais invisibles.
+   */
+  _buildItemTooltip(item) {
+    if (!item) return '';
+    const lines = [];
+    lines.push(`🔒 ${item.name} — ${item.rarityName}`);
+
+    // Stats de base
+    const stats = [];
+    if (item.stats?.atk)  stats.push(`+${item.stats.atk} ATK`);
+    if (item.stats?.hp)   stats.push(`+${item.stats.hp} HP`);
+    if (stats.length > 0) {
+      lines.push('');
+      lines.push(stats.join(' · '));
+    }
+
+    // Enchantements (bonus procéduraux)
+    if (Array.isArray(item.enchants) && item.enchants.length > 0) {
+      lines.push('');
+      lines.push('Enchantements :');
+      for (const enc of item.enchants) {
+        const prefix = enc.mode === 'percent' ? '+' : '+';
+        const suffix = enc.mode === 'percent' ? '%' : '';
+        const label = enc.name ? enc.name.replace(/\{v\}/g, enc.value) : `${prefix}${enc.value}${suffix} ${enc.stat}`;
+        lines.push(`  • ${label}`);
+      }
+    }
+
+    // Info set (pour le 2/3 pieces bonus)
+    if (item.set) {
+      lines.push('');
+      lines.push(`Set : ${item.set}`);
+    }
+
+    return lines.join('\n');
   }
 
   _readDps() {

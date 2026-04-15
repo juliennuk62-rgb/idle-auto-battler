@@ -30,6 +30,7 @@ import { MissionSystem } from './systems/MissionSystem.js';
 import { MissionScreen } from './screens/MissionScreen.js';
 import { MissionToast } from './ui/MissionToast.js';
 import { LeaderboardSystem } from './systems/LeaderboardSystem.js';
+import { ConsentBanner } from './ui/ConsentBanner.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
@@ -162,6 +163,10 @@ async function boot() {
   // Toast de notification missions — actif partout (menu, combat, etc.)
   missionToast = new MissionToast();
 
+  // Bandeau RGPD minimal — s'affiche une seule fois pour un test fermé.
+  const consentBanner = new ConsentBanner();
+  consentBanner.show();
+
   // Console admin (F9) — accessible partout
   new DevConsole();
 
@@ -207,7 +212,13 @@ function navigateTo(screen, data) {
     if (oldEl) setTimeout(() => oldScreen.hide(), 150);
     else oldScreen.hide();
   }
-  if (screen !== 'combat') hideGame();
+  if (screen !== 'combat') {
+    hideGame();
+    // FIX Launch Checklist : toujours déverrouiller l'équipement quand on quitte
+    // le combat (même via le bouton "← Carte", pas seulement via onCombatEnd).
+    // Sinon l'inventaire reste lock forever si le joueur quitte mid-combat.
+    ItemSystem.equipmentLocked = false;
+  }
 
   switch (screen) {
     case 'menu':

@@ -28,17 +28,24 @@ export class MenuScreen {
         <div class="menu-title">IDLE AUTO-BATTLER</div>
         <div class="menu-subtitle">Choisissez votre aventure</div>
 
-        <div class="menu-buttons">
-          <button class="menu-btn menu-btn-primary" data-nav="map">
+        <!-- Section PRINCIPAL : les 3 points d'entrée de jeu -->
+        <div class="menu-section-label">⚔ JOUER</div>
+        <div class="menu-buttons menu-buttons-primary">
+          <button class="menu-btn menu-btn-primary menu-btn-xl" data-nav="map">
             <span class="menu-btn-icon">⚔</span>
             <span class="menu-btn-label">AVENTURE</span>
-            <span class="menu-btn-desc">Carte du monde</span>
+            <span class="menu-btn-desc">Carte du monde · 6 biomes</span>
           </button>
-          <button class="menu-btn menu-btn-primary" data-nav="dungeons">
+          <button class="menu-btn menu-btn-primary menu-btn-xl" data-nav="dungeons">
             <span class="menu-btn-icon">🗡</span>
             <span class="menu-btn-label">DONJONS</span>
-            <span class="menu-btn-desc">Exploration roguelike</span>
+            <span class="menu-btn-desc">Exploration tactique roguelike</span>
           </button>
+        </div>
+
+        <!-- Section PROGRESSION : gacha, coffres, missions -->
+        <div class="menu-section-label">✨ PROGRESSION</div>
+        <div class="menu-buttons">
           <button class="menu-btn menu-btn-summon" data-nav="summon">
             <span class="menu-btn-icon">✨</span>
             <span class="menu-btn-label">INVOCATION</span>
@@ -47,7 +54,7 @@ export class MenuScreen {
           <button class="menu-btn menu-btn-chest" data-nav="chests">
             <span class="menu-btn-icon">📦</span>
             <span class="menu-btn-label">COFFRES</span>
-            <span class="menu-btn-desc">Runes de Boost par biome</span>
+            <span class="menu-btn-desc">Runes de Boost</span>
           </button>
           <button class="menu-btn menu-btn-mission" data-nav="missions">
             <span class="menu-btn-icon">📋</span>
@@ -55,45 +62,55 @@ export class MenuScreen {
             <span class="menu-btn-desc">Objectifs quotidiens</span>
             ${MissionSystem.getClaimableCount() > 0 ? `<span class="menu-btn-badge">${MissionSystem.getClaimableCount()}</span>` : ''}
           </button>
-          <button class="menu-btn" data-nav="collection">
-            <span class="menu-btn-icon">📖</span>
-            <span class="menu-btn-label">COLLECTION</span>
-            <span class="menu-btn-desc">Pokédex de héros</span>
+          <button class="menu-btn" data-nav="prestige">
+            <span class="menu-btn-icon">♦</span>
+            <span class="menu-btn-label">PRESTIGE</span>
+            <span class="menu-btn-desc">Bonus permanents</span>
           </button>
+        </div>
+
+        <!-- Section GESTION : équipe, inventaire, talents -->
+        <div class="menu-section-label">👥 GESTION</div>
+        <div class="menu-buttons">
           <button class="menu-btn" data-nav="team">
             <span class="menu-btn-icon">👥</span>
             <span class="menu-btn-label">ÉQUIPE</span>
-            <span class="menu-btn-desc">Gérez vos héros</span>
-          </button>
-          <button class="menu-btn" data-nav="talents">
-            <span class="menu-btn-icon">🌳</span>
-            <span class="menu-btn-label">TALENTS</span>
-            <span class="menu-btn-desc">Spécialisez vos unités</span>
+            <span class="menu-btn-desc">Composez votre escouade</span>
           </button>
           <button class="menu-btn" data-nav="inventory">
             <span class="menu-btn-icon">🎒</span>
             <span class="menu-btn-label">INVENTAIRE</span>
             <span class="menu-btn-desc">Équipement et forge</span>
           </button>
-          <button class="menu-btn" data-nav="prestige">
-            <span class="menu-btn-icon">♦</span>
-            <span class="menu-btn-label">PRESTIGE</span>
-            <span class="menu-btn-desc">Bonus permanents</span>
+          <button class="menu-btn" data-nav="talents">
+            <span class="menu-btn-icon">🌳</span>
+            <span class="menu-btn-label">TALENTS</span>
+            <span class="menu-btn-desc">Spécialisez vos unités</span>
           </button>
+          <button class="menu-btn" data-nav="collection">
+            <span class="menu-btn-icon">📖</span>
+            <span class="menu-btn-label">COLLECTION</span>
+            <span class="menu-btn-desc">Pokédex de héros</span>
+          </button>
+        </div>
+
+        <!-- Section SOCIAL & META : achievements, classement, stats -->
+        <div class="menu-section-label">🏆 SOCIAL &amp; MÉTA</div>
+        <div class="menu-buttons">
           <button class="menu-btn" data-nav="achievements">
             <span class="menu-btn-icon">🏆</span>
             <span class="menu-btn-label">ACHIEVEMENTS</span>
-            <span class="menu-btn-desc">Défis et récompenses</span>
+            <span class="menu-btn-desc">60 défis à relever</span>
           </button>
           <button class="menu-btn" data-nav="leaderboard">
             <span class="menu-btn-icon">🥇</span>
             <span class="menu-btn-label">CLASSEMENT</span>
-            <span class="menu-btn-desc">Top hebdomadaire multi-catégories</span>
+            <span class="menu-btn-desc">Top hebdomadaire</span>
           </button>
           <button class="menu-btn" data-nav="stats">
             <span class="menu-btn-icon">📊</span>
             <span class="menu-btn-label">STATISTIQUES</span>
-            <span class="menu-btn-desc">Dashboard et télémétrie</span>
+            <span class="menu-btn-desc">Dashboard analytics</span>
           </button>
         </div>
 
