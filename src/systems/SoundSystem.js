@@ -84,7 +84,11 @@ class SoundSystemImpl {
   init() {
     if (this._initialized) return;
     try {
-      zzfxX = new AudioContext();
+      zzfxX = new (window.AudioContext || window.webkitAudioContext)();
+      // Chrome/Safari démarrent souvent en "suspended" — force le resume
+      if (zzfxX.state === 'suspended') {
+        zzfxX.resume().catch(() => {});
+      }
       this._initialized = true;
     } catch (e) {
       console.warn('[SoundSystem] Web Audio non disponible :', e.message);
@@ -94,11 +98,27 @@ class SoundSystemImpl {
 
   /**
    * Joue un son par son nom. No-op si désactivé ou si le son n'existe pas.
+   * Auto-init si pas encore initialisé (rattrape le cas où le premier clic
+   * n'a pas été capté par main.js).
+   *
    * @param {string} name — clé dans SOUNDS (ex: 'hit', 'pullUR', 'gold')
    * @param {number} [volumeOverride] — volume spécifique (0-1), sinon utilise _volume global
    */
   play(name, volumeOverride) {
-    if (!this._enabled || !this._initialized) return;
+    if (!this._enabled) return;
+
+    // Auto-init au premier play (rattrape le cas où le listener click de main.js
+    // n'a pas encore fire, mais un système appelle play() quand même)
+    if (!this._initialized) {
+      this.init();
+      if (!this._initialized) return; // init a échoué → abandon
+    }
+
+    // Resume si suspendu (peut arriver après un onglet inactif)
+    if (zzfxX && zzfxX.state === 'suspended') {
+      zzfxX.resume().catch(() => {});
+    }
+
     const params = SOUNDS[name];
     if (!params) return;
 
