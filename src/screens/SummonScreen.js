@@ -101,7 +101,7 @@ export class SummonScreen {
     this._animateResult(results, 0, overlay);
   }
 
-  _animateResult(results, index, overlay) {
+  async _animateResult(results, index, overlay) {
     if (index >= results.length) {
       // Fin — afficher le récap si multi-pull
       if (results.length > 1) {
@@ -120,8 +120,10 @@ export class SummonScreen {
     // Phrase de reveal du héros (si disponible)
     let revealSpeech = '';
     try {
-      const { getRevealSpeech } = await import('../data/revealSpeeches.js');
-      revealSpeech = getRevealSpeech(r.hero.id);
+      // Import statique en top de fichier serait plus propre, mais le fichier
+      // peut ne pas exister → on utilise un import dynamique non-bloquant.
+      const mod = await import('../data/revealSpeeches.js').catch(() => null);
+      if (mod) revealSpeech = mod.getRevealSpeech(r.hero.id);
     } catch {}
 
     overlay.innerHTML = `

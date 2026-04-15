@@ -7,7 +7,7 @@ import { ResourceSystem } from './ResourceSystem.js';
 
 const STORAGE_KEY = 'idle_autobattler_gacha';
 
-const RARITY_ORDER = ['R', 'SR', 'SSR', 'UR'];
+const RARITY_ORDER = ['R', 'SR', 'SSR', 'UR', 'MYTHIC'];
 
 export class GachaSystemImpl {
   constructor() {
