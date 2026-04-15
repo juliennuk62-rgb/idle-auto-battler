@@ -1,12 +1,17 @@
-// AchievementSystem — 20 achievements avec tracking automatique.
+// AchievementSystem — 60 achievements avec tracking automatique.
 // Chaque achievement a un prédicat vérifié à chaque tick.
 // Récompenses : or, gemmes, fragments.
+//
+// Les 20 premiers sont les originaux "de base" (progression initiale).
+// Les 40 suivants (ACHIEVEMENTS_V2) sont générés par le content-atelier
+// et couvrent combat/collection/prestige/absurdes.
 
 import { ResourceSystem } from './ResourceSystem.js';
+import { ACHIEVEMENTS_V2 } from '../data/achievements-v2.js';
 
 const STORAGE_KEY = 'idle_autobattler_achievements';
 
-const ACHIEVEMENTS = [
+const ACHIEVEMENTS_BASE = [
   // ── Débutant ──
   { id: 'first_blood',    name: 'Premier Sang',       desc: 'Tuez votre premier monstre',          icon: '🗡', tracker: 'kills',        target: 1,      reward: { gold: 50 },     tier: 'bronze' },
   { id: 'wave_5',         name: 'Échauffement',       desc: 'Atteignez la vague 5',                icon: '🌊', tracker: 'max_wave',     target: 5,      reward: { gold: 100 },    tier: 'bronze' },
@@ -35,6 +40,15 @@ const ACHIEVEMENTS = [
   { id: 'prestige_3',     name: 'Renaissant',         desc: 'Effectuez 3 prestiges',               icon: '♻',  tracker: 'prestiges',    target: 3,      reward: { gems: 20 },     tier: 'legendary' },
   { id: 'infinite_200',   name: 'Sans Limite',        desc: 'Atteignez la vague 200 en mode infini', icon: '∞', tracker: 'infinite_wave', target: 200,  reward: { gems: 50 },     tier: 'legendary' },
 ];
+
+// Fusion des 20 achievements de base + 40 étendus (60 au total).
+// Dédup par ID au cas où (sécurité).
+const SEEN_IDS = new Set();
+const ACHIEVEMENTS = [...ACHIEVEMENTS_BASE, ...ACHIEVEMENTS_V2].filter(a => {
+  if (SEEN_IDS.has(a.id)) return false;
+  SEEN_IDS.add(a.id);
+  return true;
+});
 
 const TIER_COLORS = {
   bronze: '#cd7f32',
