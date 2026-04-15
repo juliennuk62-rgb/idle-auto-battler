@@ -18,6 +18,7 @@ import { MissionSystem } from './MissionSystem.js';
 import { SynergySystem } from './SynergySystem.js';
 import { AchievementSystem } from './AchievementSystem.js';
 import { LeaderboardSystem } from './LeaderboardSystem.js';
+import { SoundSystem } from './SoundSystem.js';
 import { ResourceSystem } from './ResourceSystem.js';
 import { PrestigeSystem } from './PrestigeSystem.js';
 import { computeXpReward } from './Progression.js';
@@ -392,6 +393,9 @@ export class CombatSystem {
       target.applyKnockback(attacker.container.x, intensity);
     }
 
+    // Son de combat : hit normal ou crit
+    SoundSystem.play(isBigHit ? 'crit' : 'hit');
+
     // Floating damage (format "critical" si gros coup pour mise en valeur visuelle).
     if (this.scene.floatingDamage) {
       this.scene.floatingDamage.spawn(
@@ -482,6 +486,7 @@ export class CombatSystem {
     // Shake + zoom pour kills ennemis uniquement.
     if (wasEnemy) {
       const isBossKill = target.isBoss;
+      SoundSystem.play(isBossKill ? 'bossDeath' : 'kill');
       const shakeIntensity = isBossKill ? 0.012 : 0.005;
       const shakeDuration = isBossKill ? 200 : 90;
       this.scene.cameras.main.shake(shakeDuration, shakeIntensity);
@@ -561,6 +566,7 @@ export class CombatSystem {
       MissionSystem.track('gold_earned', finalGold);
       AchievementSystem.increment('total_gold', finalGold);
       LeaderboardSystem.recordGold(finalGold);
+      SoundSystem.play('gold', 0.2); // volume bas pour éviter le spam
       if (reward.gems > 0) {
         ResourceSystem.addGems(reward.gems);
         this.combatGemsEarned += reward.gems;
@@ -602,10 +608,13 @@ export class CombatSystem {
             // Item auto-vendu — track l'or récupéré (sellValue ~ 50% du gold value)
             this._biomeStats.autoSoldCount = (this._biomeStats.autoSoldCount || 0) + 1;
           }
-          // Narrator RNG : commentaire sur le loot (rare/épique/légendaire surtout)
+          // Narrator RNG : commentaire sur le loot
           import('./NarratorSystem.js').then(({ NarratorSystem }) => {
             NarratorSystem.onLoot({ rarity: lootItem.rarity });
           }).catch(() => {});
+          // Son de loot selon rareté
+          const lootSoundMap = { mythic: 'lootMythic', legendary: 'lootEpic', epic: 'lootEpic', rare: 'lootRare' };
+          SoundSystem.play(lootSoundMap[lootItem.rarity] || 'lootCommon');
         }
         if (lootItem && this.scene.floatingDamage) {
           this.scene.floatingDamage.spawn(
@@ -863,11 +872,11 @@ export class CombatSystem {
       });
     }
 
-    // Shake caméra + flash rouge à l'apparition d'un boss (dramatise l'arrivée).
+    // Shake caméra + flash rouge + son à l'apparition d'un boss
     if (isBoss && this.scene?.cameras?.main) {
       this.scene.cameras.main.shake(650, 0.014);
-      // Flash rouge subtil (alpha 0.15) via camera flash
       this.scene.cameras.main.flash(400, 200, 30, 30, false);
+      SoundSystem.play('bossSpawn');
     }
   }
 

@@ -34,6 +34,7 @@ import { ConsentBanner } from './ui/ConsentBanner.js';
 import { MultiTabGuard } from './utils/MultiTabGuard.js';
 import { OpeningScreen } from './screens/OpeningScreen.js';
 import { EventSystem } from './systems/EventSystem.js';
+import { SoundSystem } from './systems/SoundSystem.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
@@ -178,11 +179,22 @@ async function boot() {
   // Active les modifiers (drop rate ×N, gold ×N) si un event est en cours.
   EventSystem.init();
 
+  // SoundSystem : initialisé au premier clic user (Web Audio exige un geste).
+  // On écoute le premier click/touch puis on init (ne bloque pas le boot).
+  const initSound = () => {
+    SoundSystem.init();
+    document.removeEventListener('click', initSound);
+    document.removeEventListener('touchstart', initSound);
+  };
+  document.addEventListener('click', initSound, { once: true });
+  document.addEventListener('touchstart', initSound, { once: true });
+
   // Console admin (F9) — accessible partout
   new DevConsole();
 
-  // Toast quand un achievement est débloqué
+  // Toast + son quand un achievement est débloqué
   AchievementSystem.onUnlock((ach) => {
+    SoundSystem.play('achievement');
     const toast = document.createElement('div');
     toast.className = 'achiev-toast';
     toast.innerHTML = `

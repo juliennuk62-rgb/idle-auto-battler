@@ -122,8 +122,13 @@ export class GachaSystemImpl {
     const isNew = !this.ownedHeroes.includes(hero.id);
     if (isNew) this.ownedHeroes.push(hero.id);
 
-    // Narrator RNG : commentaire contextuel sur le pull (async import pour éviter
-    // de créer un import circulaire entre NarratorSystem → GachaSystem).
+    // Son du pull selon rareté
+    import('./SoundSystem.js').then(({ SoundSystem }) => {
+      const soundMap = { R: 'pullR', SR: 'pullSR', SSR: 'pullSSR', UR: 'pullUR', MYTHIC: 'pullMYTHIC' };
+      SoundSystem.play(wasPity ? 'pityBreak' : (soundMap[rarity] || 'pullR'));
+    }).catch(() => {});
+
+    // Narrator RNG : commentaire contextuel sur le pull
     import('./NarratorSystem.js').then(({ NarratorSystem }) => {
       NarratorSystem.onPull({ rarity, isPity: wasPity });
     }).catch(() => {});
