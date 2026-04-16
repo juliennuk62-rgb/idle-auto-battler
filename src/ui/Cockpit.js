@@ -170,6 +170,24 @@ export class Cockpit {
     });
     this.topBar.append(speedSection);
 
+    // Bouton mute — persistant, accessible sur desktop ET mobile
+    import('../systems/SoundSystem.js').then(({ SoundSystem }) => {
+      const muteBtn = document.createElement('button');
+      muteBtn.className = 'mute-btn';
+      const updateIcon = () => {
+        muteBtn.textContent = SoundSystem.isEnabled() ? '🔊' : '🔇';
+        muteBtn.title = SoundSystem.isEnabled() ? 'Sons activés (cliquer pour muter)' : 'Sons coupés (cliquer pour réactiver)';
+      };
+      updateIcon();
+      muteBtn.addEventListener('click', () => {
+        SoundSystem.toggle();
+        updateIcon();
+        // Si on réactive, joue un son de confirmation
+        if (SoundSystem.isEnabled()) SoundSystem.play('click');
+      });
+      this.topBar.append(muteBtn);
+    }).catch(() => {});
+
     // Wave section — compteur + mini progress vers boss
     const waveSection = document.createElement('div');
     waveSection.className = 'topbar-section';

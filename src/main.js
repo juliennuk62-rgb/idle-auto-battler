@@ -179,15 +179,23 @@ async function boot() {
   // Active les modifiers (drop rate ×N, gold ×N) si un event est en cours.
   EventSystem.init();
 
-  // SoundSystem : initialisé au premier clic user (Web Audio exige un geste).
-  // On écoute le premier click/touch puis on init (ne bloque pas le boot).
+  // SoundSystem : initialisé au premier geste user (Web Audio exige un click/touch).
+  // Mobile Safari/Chrome : touchend est plus fiable que click pour débloquer Web Audio.
+  // On attache plusieurs events + on les garde actifs au cas où le premier foirerait.
   const initSound = () => {
     SoundSystem.init();
-    document.removeEventListener('click', initSound);
-    document.removeEventListener('touchstart', initSound);
+    // Si après l'init le contexte est quand même suspendu, on réessaye au prochain geste
+    if (SoundSystem.isEnabled() && SoundSystem._initialized) {
+      document.removeEventListener('click', initSound);
+      document.removeEventListener('touchend', initSound);
+      document.removeEventListener('keydown', initSound);
+    }
   };
-  document.addEventListener('click', initSound, { once: true });
-  document.addEventListener('touchstart', initSound, { once: true });
+  document.addEventListener('click',    initSound);
+  document.addEventListener('touchend', initSound);
+  document.addEventListener('keydown',  initSound);
+  // Expose SoundSystem globalement pour debug facile (window.SoundSystem dans la console)
+  window.SoundSystem = SoundSystem;
 
   // Console admin (F9) — accessible partout
   new DevConsole();
