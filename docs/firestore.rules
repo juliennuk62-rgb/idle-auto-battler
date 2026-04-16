@@ -4,12 +4,8 @@ service cloud.firestore {
 
     // ─── Saves utilisateur ───
     // Chaque joueur lit/ecrit uniquement son propre save.
-    // Size limit : 1 MB max par doc (evite abus).
     match /saves/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.size < 1048576; // 1 MB
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
     // ─── Leaderboard hebdomadaire ───
