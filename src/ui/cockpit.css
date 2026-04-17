@@ -6569,6 +6569,53 @@ li {
   height: 48px;
 }
 
+/* ─── Hero sprite dans le Codex ─────────────────────────────────── */
+
+.bestiary-card-hero-sprite {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+  margin: 4px 0 8px;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+  border-radius: 4px;
+}
+
+.bestiary-card-hero-sprite svg {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  transition: transform 0.2s;
+}
+
+.bestiary-card:hover .bestiary-card-hero-sprite svg {
+  transform: scale(1.1);
+}
+
+/* ─── Sprite héros dans l'écran d'invocation ─────────────────────── */
+
+.summon-reveal-sprite {
+  display: flex;
+  justify-content: center;
+  margin: 12px auto;
+  animation: heroSpriteFloat 2.4s ease-in-out infinite;
+}
+
+.summon-reveal-sprite svg {
+  width: 160px;
+  height: 160px;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+@keyframes heroSpriteFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
 /* ─── Boss card specific ──────────────────────────────────────────── */
 
 .bestiary-card-boss {

@@ -7,6 +7,7 @@ import { BALANCE } from '../data/balance.js';
 import { HEROES, HERO_RARITIES } from '../data/heroes.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
 import { getRevealSpeech } from '../data/revealSpeeches.js';
+import { getHeroSVG } from '../data/hero-sprites.js';
 
 export class SummonScreen {
   constructor(onNavigate) {
@@ -121,6 +122,7 @@ export class SummonScreen {
     // Phrase de reveal du héros (import statique en haut du fichier)
     const revealSpeech = getRevealSpeech(r.hero.id) || '';
 
+    const heroSvg = getHeroSVG(r.hero.id);
     overlay.innerHTML = `
       <div class="summon-stars-bg"></div>
       <div class="summon-meteor" style="--meteor-color:${rarityInfo.color};"></div>
@@ -128,6 +130,7 @@ export class SummonScreen {
         <div class="summon-reveal-flash" style="background:${rarityInfo.color};"></div>
         <div class="summon-reveal-hero">
           <div class="summon-reveal-rarity" style="color:${rarityInfo.color}">${rarityInfo.name}</div>
+          ${heroSvg ? `<div class="summon-reveal-sprite" style="filter:drop-shadow(0 0 16px ${rarityInfo.color})">${heroSvg}</div>` : ''}
           <div class="summon-reveal-name">${r.hero.name}</div>
           ${revealSpeech ? `<div class="summon-reveal-speech">"${revealSpeech}"</div>` : ''}
           <div class="summon-reveal-class">${r.hero.class}</div>
