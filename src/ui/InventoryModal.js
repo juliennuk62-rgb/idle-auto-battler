@@ -12,6 +12,7 @@
 
 import { Modal } from './Modal.js';
 import { ItemSystem } from '../systems/ItemSystem.js';
+import { renderItemIcon } from '../data/item-icons.js';
 import { ResourceSystem } from '../systems/ResourceSystem.js';
 import { sellValue, RARITY_INDEX } from '../data/items.js';
 import { gradeName } from '../data/grades.js';
@@ -126,7 +127,7 @@ export class InventoryModal {
             if (item) {
               return `<div class="inv-ally-slot filled locked" data-unequip="${item.uid}" data-fighter="${fighter.id}" data-slot="${slot}"
                            style="border-color:${item.rarityColor};" title="${item.name} (${item.rarityName}) — double-clic pour retirer">
-                <span>${item.icon}</span>
+                ${renderItemIcon(item)}
                 <span class="slot-lock">🔒</span>
               </div>`;
             }
@@ -151,7 +152,7 @@ export class InventoryModal {
                  style="border-color:${item.rarityColor};"
                  title="${item.name} (${item.rarityName} · ${typeLabel})">
       <div class="inv-item-type-badge" style="background:${typeColor}">${typeLabel}</div>
-      <span class="inv-item-icon">${item.icon}</span>
+      <div class="inv-item-icon">${renderItemIcon(item)}</div>
       <div class="inv-item-name">${shortName}</div>
       <div class="inv-item-rarity" style="background:${item.rarityColor};"></div>
     </div>`;

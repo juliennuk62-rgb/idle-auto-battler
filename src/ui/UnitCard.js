@@ -7,6 +7,7 @@
 import { xpToNextLevel } from '../systems/Progression.js';
 import { gradeName } from '../data/grades.js';
 import { ItemSystem } from '../systems/ItemSystem.js';
+import { renderItemIcon } from '../data/item-icons.js';
 
 const CLASS_ICONS = {
   warrior: '⚔',
@@ -213,7 +214,8 @@ export class UnitCard {
       const slotDiv = el.parentElement;
 
       if (item) {
-        el.textContent = item.icon;
+        // Affiche l'icône SVG pixel art avec coloration rareté
+        el.innerHTML = renderItemIcon(item);
         el.title = this._buildItemTooltip(item);
         slotDiv.style.borderColor = item.rarityColor;
         slotDiv.classList.add('equipped');
@@ -225,7 +227,7 @@ export class UnitCard {
           slotDiv.append(lock);
         }
       } else {
-        el.textContent = '';
+        el.innerHTML = '';
         el.title = '';
         slotDiv.style.borderColor = '';
         slotDiv.classList.remove('equipped');
