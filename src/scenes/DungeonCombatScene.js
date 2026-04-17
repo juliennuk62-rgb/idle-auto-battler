@@ -7,7 +7,6 @@ import { DungeonFighter } from '../entities/DungeonFighter.js';
 import { DungeonUI } from '../ui/DungeonUI.js';
 import { GRID, GRID_COLORS } from '../data/dungeonConfig.js';
 import { GachaSystem } from '../systems/GachaSystem.js';
-import { registerHeroTextures, getHeroSpriteKey } from '../data/hero-sprites.js';
 
 export class DungeonCombatScene extends Phaser.Scene {
   constructor() {
@@ -38,8 +37,6 @@ export class DungeonCombatScene extends Phaser.Scene {
     for (const [key, path] of Object.entries(sprites)) {
       if (!this.textures.exists(key)) this.load.image(key, path);
     }
-    // Sprites héros uniques (SVG inline en data URI)
-    registerHeroTextures(this);
   }
 
   create() {
@@ -138,15 +135,11 @@ export class DungeonCombatScene extends Phaser.Scene {
   _getSlotInfo(slotId, defaultName, baseHp, baseAtk) {
     const mods = GachaSystem.getHeroModifiers(slotId);
     const statMult = mods.statMult || 1;
-    const assignedHero = GachaSystem.getAssignedHero(slotId);
-    // Sprite unique du héros assigné (via hero-sprites.js), sinon null → fallback sur classe
-    const heroSpriteKey = assignedHero ? getHeroSpriteKey(assignedHero.id) : null;
     return {
       name: mods.heroName || defaultName,
       hp: Math.round(baseHp * statMult),
       atk: Math.round(baseAtk * statMult),
       heroPassifs: mods.passifs || [],
-      heroSpriteKey, // null si pas de héros assigné → fallback sur classe
     };
   }
 
@@ -162,7 +155,7 @@ export class DungeonCombatScene extends Phaser.Scene {
       new DungeonFighter({
         name: warriorInfo.name, class: 'warrior', isPlayer: true,
         hp: warriorInfo.hp, atk: warriorInfo.atk, gridCol: 1, gridRow: 3,
-        spriteKey: warriorInfo.heroSpriteKey || 'warrior',
+        spriteKey: 'warrior',
         abilities: [
           { id: 'strike', name: 'Frappe', paCost: 3, minRange: 1, maxRange: 1,
             aoeShape: 'single', targetType: 'enemy', damage: { base: 0, scaling: 1.0 },
@@ -177,7 +170,7 @@ export class DungeonCombatScene extends Phaser.Scene {
       new DungeonFighter({
         name: archerInfo.name, class: 'archer', isPlayer: true,
         hp: archerInfo.hp, atk: archerInfo.atk, gridCol: 0, gridRow: 2,
-        spriteKey: archerInfo.heroSpriteKey || 'archer',
+        spriteKey: 'archer',
         abilities: [
           { id: 'arrow', name: 'Tir', paCost: 3, minRange: 2, maxRange: 6,
             aoeShape: 'single', targetType: 'enemy', damage: { base: 0, scaling: 1.0 },
@@ -187,7 +180,7 @@ export class DungeonCombatScene extends Phaser.Scene {
       new DungeonFighter({
         name: mageInfo.name, class: 'mage', isPlayer: true,
         hp: mageInfo.hp, atk: mageInfo.atk, gridCol: 0, gridRow: 4,
-        spriteKey: mageInfo.heroSpriteKey || 'mage',
+        spriteKey: 'mage',
         abilities: [
           { id: 'arcane', name: 'Trait arcanique', paCost: 3, minRange: 1, maxRange: 5,
             aoeShape: 'single', targetType: 'enemy', damage: { base: 0, scaling: 1.1 },
@@ -200,7 +193,7 @@ export class DungeonCombatScene extends Phaser.Scene {
       new DungeonFighter({
         name: healerInfo.name, class: 'healer', isPlayer: true,
         hp: healerInfo.hp, atk: healerInfo.atk, gridCol: 0, gridRow: 5,
-        spriteKey: healerInfo.heroSpriteKey || 'healer',
+        spriteKey: 'healer',
         abilities: [
           { id: 'heal', name: 'Soin', paCost: 3, minRange: 1, maxRange: 4,
             aoeShape: 'single', targetType: 'ally', heal: { base: 0, scaling: 1.2 },

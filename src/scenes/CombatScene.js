@@ -14,7 +14,6 @@ import { PrestigeSystem } from '../systems/PrestigeSystem.js';
 import { ItemSystem } from '../systems/ItemSystem.js';
 import { GachaSystem } from '../systems/GachaSystem.js';
 import { AchievementSystem } from '../systems/AchievementSystem.js';
-import { registerHeroTextures, getHeroSpriteKey } from '../data/hero-sprites.js';
 
 // Scène principale : combat auto avec classes, grades, vagues, biomes,
 // économie et sauvegarde. Charge depuis localStorage si une save existe.
@@ -25,16 +24,11 @@ export class CombatScene extends Phaser.Scene {
   }
 
   preload() {
-    // Alliés — un sprite par classe (fallback si pas de héros assigné).
+    // Alliés — un sprite par classe.
     this.load.image('warrior', 'assets/sprites/allies/warrior.png');
     this.load.image('archer', 'assets/sprites/allies/archer.png');
     this.load.image('mage', 'assets/sprites/allies/mage.png');
     this.load.image('healer', 'assets/sprites/allies/healer.png');
-
-    // Héros uniques — 22 SVG pixel art inline (data URIs).
-    // Si un héros gacha est assigné à un slot, son sprite individuel est utilisé
-    // à la place du sprite de classe générique.
-    registerHeroTextures(this);
 
     // Monstres — fallback pour les 6 manquants.
     this.load.image('monster', 'assets/sprites/tkobold.gif');
@@ -675,16 +669,13 @@ export class CombatScene extends Phaser.Scene {
       // Vérifie si un héros gacha est assigné à ce slot
       const heroMods = GachaSystem.getHeroModifiers(slot.id);
       const heroName = heroMods.heroName || null;
-      const assignedHero = GachaSystem.getAssignedHero(slot.id);
-      // Si héros gacha assigné → utilise son sprite unique, sinon sprite de classe
-      const heroSprite = assignedHero ? getHeroSpriteKey(assignedHero.id) : null;
 
       return new Fighter(this, slot.x, slot.y, {
         ...BALANCE[slot.class],
         id: slot.id,
         name: heroName || slot.defaultName,
         grade: slot.grade || 1,
-        spriteKey: heroSprite || slot.sprite,
+        spriteKey: slot.sprite,
         spriteScale: 1.4,
         color: slot.color,
         facing: 1,
@@ -715,9 +706,6 @@ export class CombatScene extends Phaser.Scene {
       const slotId = `slot_${i + 1}`;
       const heroMods = GachaSystem.getHeroModifiers(slotId);
       const heroName = heroMods.heroName || null;
-      const assignedHero = GachaSystem.getAssignedHero(slotId);
-      // Sprite unique du héros si assigné, sinon fallback sur classe
-      const heroSprite = assignedHero ? getHeroSpriteKey(assignedHero.id) : null;
 
       const fighter = new Fighter(this, x, y, {
         ...classCfg,
@@ -725,7 +713,7 @@ export class CombatScene extends Phaser.Scene {
         name: heroName || spec.name || spec.class,
         grade: spec.grade ?? 1,
         level: spec.level ?? 1,
-        spriteKey: heroSprite || SPRITE_MAP[spec.class] || 'warrior',
+        spriteKey: SPRITE_MAP[spec.class] || 'warrior',
         spriteScale: 1.4,
         color: COLOR_MAP[spec.class] || 0x3b82f6,
         facing: 1,

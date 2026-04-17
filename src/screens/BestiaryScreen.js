@@ -9,7 +9,6 @@ import { ITEMS_EXTENDED } from '../data/items-extended.js';
 import { HERO_BIOS, BIOME_LORE, WORLD_TIMELINE, LEGENDS } from '../data/lore.js';
 import { BestiarySystem } from '../systems/BestiarySystem.js';
 import { renderItemIcon } from '../data/item-icons.js';
-import { getHeroSVG } from '../data/hero-sprites.js';
 import { escapeHtml } from '../utils/escape.js';
 
 const BIOME_NAMES = {
@@ -141,11 +140,9 @@ export class BestiaryScreen {
       `;
     }
 
-    const svg = getHeroSVG(hero.id);
     return `
       <div class="bestiary-card" style="border-color:${info.color}">
         <div class="bestiary-card-badge" style="background:${info.color}">${info.name}</div>
-        ${svg ? `<div class="bestiary-card-hero-sprite">${svg}</div>` : ''}
         <div class="bestiary-card-name">${escapeHtml(hero.name)}</div>
         ${bio ? `<div class="bestiary-card-title"><em>${escapeHtml(bio.title)}</em></div>` : ''}
         <div class="bestiary-card-class">${escapeHtml(hero.class)}</div>
