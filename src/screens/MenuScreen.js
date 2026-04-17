@@ -90,10 +90,10 @@ export class MenuScreen {
             <span class="menu-btn-label">TALENTS</span>
             <span class="menu-btn-desc">Spécialisez vos unités</span>
           </button>
-          <button class="menu-btn" data-nav="collection">
+          <button class="menu-btn" data-nav="bestiary">
             <span class="menu-btn-icon">📖</span>
-            <span class="menu-btn-label">COLLECTION</span>
-            <span class="menu-btn-desc">Pokédex de héros</span>
+            <span class="menu-btn-label">CODEX</span>
+            <span class="menu-btn-desc">Héros · Monstres · Boss · Items · Monde</span>
           </button>
         </div>
 
@@ -204,6 +204,9 @@ export class MenuScreen {
             break;
           case 'collection':
             this.onNavigate('collection');
+            break;
+          case 'bestiary':
+            this.onNavigate('bestiary');
             break;
           case 'team':
             this.onNavigate('team');

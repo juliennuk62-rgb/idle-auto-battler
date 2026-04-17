@@ -19,6 +19,7 @@ import { SynergySystem } from './SynergySystem.js';
 import { AchievementSystem } from './AchievementSystem.js';
 import { LeaderboardSystem } from './LeaderboardSystem.js';
 import { SoundSystem } from './SoundSystem.js';
+import { BestiarySystem } from './BestiarySystem.js';
 import { ResourceSystem } from './ResourceSystem.js';
 import { PrestigeSystem } from './PrestigeSystem.js';
 import { computeXpReward } from './Progression.js';
@@ -518,6 +519,10 @@ export class CombatSystem {
             });
           });
         }
+        // Discovery Bestiaire : boss scénarisé officiellement vaincu
+        if (target._scriptedBossId) {
+          BestiarySystem.discoverBoss(target._scriptedBossId);
+        }
       }
     }
 
@@ -850,10 +855,15 @@ export class CombatSystem {
         m.rescaleStats({ hp: scriptedBoss.hp, atk: scriptedBoss.atk });
         m._dialogueIntro = scriptedBoss.dialogueIntro;
         m._dialogueDefeat = scriptedBoss.dialogueDefeat;
+        m._scriptedBossId = scriptedBoss.id;
       } else {
         m.rescaleStats({ hp: hpPerMob, atk: atkPerMob });
       }
       m.setBossVisual(isBoss);
+
+      // Discovery Bestiaire : marque le monstre comme rencontré
+      BestiarySystem.discoverMonster(m.name);
+      BestiarySystem.discoverBiome(biome.id);
 
       // Pop-in animé : on set invisible puis respawn tween.
       m.container.setAlpha(0);

@@ -37,6 +37,7 @@ import { EventSystem } from './systems/EventSystem.js';
 import { SoundSystem } from './systems/SoundSystem.js';
 import { CollectionScreen } from './screens/CollectionScreen.js';
 import { TeamScreen } from './screens/TeamScreen.js';
+import { BestiaryScreen } from './screens/BestiaryScreen.js';
 import { DevConsole } from './ui/DevConsole.js';
 
 let currentScreen = null;
@@ -365,6 +366,11 @@ function navigateTo(screen, data) {
 
     case 'collection':
       currentScreen = new CollectionScreen((target) => navigateTo(target));
+      currentScreen.show();
+      break;
+
+    case 'bestiary':
+      currentScreen = new BestiaryScreen((target) => navigateTo(target));
       currentScreen.show();
       break;
 

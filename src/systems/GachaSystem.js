@@ -122,6 +122,11 @@ export class GachaSystemImpl {
     const isNew = !this.ownedHeroes.includes(hero.id);
     if (isNew) this.ownedHeroes.push(hero.id);
 
+    // Discovery Bestiaire : héros obtenu
+    import('./BestiarySystem.js').then(({ BestiarySystem }) => {
+      BestiarySystem.discoverHero(hero.id);
+    }).catch(() => {});
+
     // Son du pull selon rareté
     import('./SoundSystem.js').then(({ SoundSystem }) => {
       const soundMap = { R: 'pullR', SR: 'pullSR', SSR: 'pullSSR', UR: 'pullUR', MYTHIC: 'pullMYTHIC' };

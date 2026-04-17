@@ -144,6 +144,11 @@ export class ItemSystemImpl {
     this._unreadCount++;
     this._emit('loot_drop', item);
     this._emit('unread_changed', this._unreadCount);
+    // Discovery Bestiaire : items découverts (templateId pour procéduraux, id pour uniques)
+    import('./BestiarySystem.js').then(({ BestiarySystem }) => {
+      const itemId = item.isUnique ? item.templateId : item.templateId;
+      if (itemId) BestiarySystem.discoverItem(itemId);
+    }).catch(() => {});
     this._save();
   }
 
