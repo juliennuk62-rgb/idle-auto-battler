@@ -2,8 +2,11 @@
 // Singleton pur JS. Émet des events pour que l'UI réagisse.
 
 import { BALANCE } from '../data/balance.js';
-import { generateItem, sellValue, RARITY_INDEX, deduplicateInventory, RARITIES } from '../data/items.js';
+import { generateItem, sellValue, RARITY_INDEX, deduplicateInventory, RARITIES, ITEM_TEMPLATES } from '../data/items.js';
 import { ITEMS_EXTENDED } from '../data/items-extended.js';
+
+// Index des templates par id pour recalcul forge (utilise en ItemSystem.forge)
+const ITEM_TEMPLATES_BY_ID = Object.fromEntries(ITEM_TEMPLATES.map(t => [t.id, t]));
 
 const STORAGE_KEY = 'idle_autobattler_inventory';
 
@@ -13,8 +16,13 @@ export class ItemSystemImpl {
     this.maxSize = BALANCE.loot.inventory_size;
     this.equipmentLocked = false; // Libre par défaut, verrouillé pendant le combat actif.
     this._listeners = [];
+    this._unreadCount = 0; // Compteur d'items non vus depuis la dernière ouverture d'inventaire
     this._load();
   }
+
+  /** Badge de notification sur le bouton INVENTAIRE : nombre d'items neufs non vus. */
+  getUnreadCount() { return this._unreadCount; }
+  markAllAsRead() { this._unreadCount = 0; this._emit('unread_changed', 0); }
 
   // ─── Events ─────────────────────────────────────────────────────────────
 
@@ -44,7 +52,6 @@ export class ItemSystemImpl {
     if (Math.random() > dropRate) return null;
 
     // Boss kill → 40% chance de drop un item UNIQUE de ITEMS_EXTENDED
-    // (les items mythiques/légendaires scénarisés avec effets spéciaux).
     if (isBoss && Math.random() < 0.4) {
       const uniqueItem = this._rollBossUniqueItem();
       if (uniqueItem) {
@@ -56,11 +63,10 @@ export class ItemSystemImpl {
     const item = generateItem(biomeId, wave);
     this._addToInventory(item);
 
-    // Boss double drop
+    // Boss double drop (_addToInventory emit deja loot_drop, pas de double emit)
     if (isBoss && Math.random() < cfg.boss_double_drop) {
       const bonus = generateItem(biomeId, wave);
       this._addToInventory(bonus);
-      this._emit('loot_drop', bonus);
     }
 
     return item;
@@ -119,17 +125,25 @@ export class ItemSystemImpl {
 
   _addToInventory(item) {
     if (this.inventory.length >= this.maxSize) {
-      // Auto-sell le moins cher
+      // Auto-sell le moins cher (sauf items équipés ET uniques — on protège les légendaires)
       const cheapest = [...this.inventory]
-        .filter(i => !i.equippedOn)
+        .filter(i => !i.equippedOn && !i.isUnique && (i.rarity === 'common' || i.rarity === 'uncommon' || i.rarity === 'rare'))
         .sort((a, b) => sellValue(a) - sellValue(b))[0];
       if (cheapest) {
         this.sell(cheapest.uid);
         this._emit('auto_sold', cheapest);
       }
+      // Si aucun commun/uncommon/rare à vendre, tant pis : on refuse le drop
+      // pour ne pas auto-sell des épiques/légendaires/mythiques (trop cruel)
+      if (this.inventory.length >= this.maxSize) {
+        this._emit('inventory_full', item);
+        return; // drop perdu mais pas de légendaire sacrifié
+      }
     }
     this.inventory.push(item);
+    this._unreadCount++;
     this._emit('loot_drop', item);
+    this._emit('unread_changed', this._unreadCount);
     this._save();
   }
 
@@ -223,10 +237,9 @@ export class ItemSystemImpl {
 
     // Génère un nouvel item de rareté supérieure (biome du premier item)
     const newItem = generateItem(items[0].set || 'forest', 1);
-    // Force la rareté au tier supérieur
+    // Force la rareté au tier supérieur (RARITIES import en haut du fichier)
     const nextRarities = ['uncommon', 'rare', 'epic', 'legendary'];
     const targetRarity = nextRarities[rarityIdx];
-    const { RARITIES } = require_rarities();
     const nextR = RARITIES.find(r => r.id === targetRarity);
     if (nextR) {
       newItem.rarity = nextR.id;
@@ -302,20 +315,5 @@ export class ItemSystemImpl {
     try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
   }
 }
-
-// Hack pour accéder aux RARITIES et templates sans import circulaire dans forge
-function require_rarities() {
-  return { RARITIES: [
-    { id: 'common',    color: '#9ca3af', statMult: 1.0 },
-    { id: 'uncommon',  color: '#22c55e', statMult: 1.5 },
-    { id: 'rare',      color: '#3b82f6', statMult: 2.0 },
-    { id: 'epic',      color: '#a855f7', statMult: 3.0 },
-    { id: 'legendary', color: '#f97316', statMult: 5.0 },
-  ]};
-}
-
-// Index des templates par id pour recalcul forge
-import { ITEM_TEMPLATES } from '../data/items.js';
-const ITEM_TEMPLATES_BY_ID = Object.fromEntries(ITEM_TEMPLATES.map(t => [t.id, t]));
 
 export const ItemSystem = new ItemSystemImpl();

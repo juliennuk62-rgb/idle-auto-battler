@@ -4,6 +4,7 @@
 
 import { AuthSystem } from '../systems/AuthSystem.js';
 import { InventoryModal } from '../ui/InventoryModal.js';
+import { ItemSystem } from '../systems/ItemSystem.js';
 import { PrestigeModal } from '../ui/PrestigeModal.js';
 import { StatsModal } from '../ui/StatsModal.js';
 import { TalentModal } from '../ui/TalentModal.js';
@@ -82,6 +83,7 @@ export class MenuScreen {
             <span class="menu-btn-icon">🎒</span>
             <span class="menu-btn-label">INVENTAIRE</span>
             <span class="menu-btn-desc">Équipement et forge</span>
+            ${ItemSystem.getUnreadCount() > 0 ? `<span class="menu-btn-badge">${ItemSystem.getUnreadCount()}</span>` : ''}
           </button>
           <button class="menu-btn" data-nav="talents">
             <span class="menu-btn-icon">🌳</span>
@@ -213,6 +215,7 @@ export class MenuScreen {
           case 'inventory':
             if (!this._invModal) this._invModal = new InventoryModal({ game: null });
             this._invModal.modal.open();
+            ItemSystem.markAllAsRead(); // efface le badge NEW sur le bouton
             break;
           case 'prestige':
             if (!this._prestigeModal) this._prestigeModal = new PrestigeModal({ game: null });

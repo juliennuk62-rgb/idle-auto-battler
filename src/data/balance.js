@@ -173,7 +173,7 @@ export const BALANCE = {
     drop_rate_per_wave: 0.005, // +0.5% par wave (wave 20 = 25%)
     boss_drop_rate: 1.0,       // 100% garanti
     boss_double_drop: 0.30,    // 30% chance d'un 2ème drop sur un boss
-    inventory_size: 20,        // slots max d'inventaire
+    inventory_size: 60,        // slots max d'inventaire (15 equipes + 45 libres, evite auto-sell agressif)
     forge_costs: [50, 200, 800, 3000], // or pour forger C→U, U→R, R→E, E→L
   },
 

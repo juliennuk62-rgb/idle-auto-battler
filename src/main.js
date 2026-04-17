@@ -216,6 +216,35 @@ async function boot() {
     setTimeout(() => toast.remove(), 4000);
   });
 
+  // Toast visible pour TOUT item drop (surtout les epic/legendary/mythic)
+  // Fixe le probleme "je ne vois pas les items droppes"
+  ItemSystem.on('loot_drop', (item) => {
+    if (!item) return;
+    // Filtre : on n'affiche de toast QUE pour les items interessants (rare+)
+    const rarityRank = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
+    const rank = rarityRank[item.rarity] ?? 0;
+    if (rank < 2) return; // ignore common/uncommon pour ne pas spammer
+
+    // Import dynamique du Toast pour eviter import circulaire
+    import('./ui/ToastSystem.js').then(({ Toast }) => {
+      const variant = rank >= 4 ? 'reward' : 'success';
+      Toast[variant](`${item.icon} ${item.name}`, {
+        desc: `${item.rarityName}${item.isUnique ? ' · ITEM UNIQUE' : ''}`,
+        duration: rank >= 4 ? 5000 : 2500,
+      });
+    }).catch(() => {});
+  });
+
+  // Toast d'alerte si inventaire plein (le drop est perdu)
+  ItemSystem.on('inventory_full', (lostItem) => {
+    import('./ui/ToastSystem.js').then(({ Toast }) => {
+      Toast.error('Inventaire plein !', {
+        desc: `${lostItem.name} (${lostItem.rarityName}) perdu. Vends des items ou agrandis.`,
+        duration: 4000,
+      });
+    }).catch(() => {});
+  });
+
   // Opening cinématique — première fois seulement (flag localStorage).
   // Après l'opening → menu principal comme d'habitude.
   if (!OpeningScreen.isDone()) {
