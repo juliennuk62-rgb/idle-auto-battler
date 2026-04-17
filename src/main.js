@@ -200,20 +200,40 @@ async function boot() {
   // Console admin (F9) — accessible partout
   new DevConsole();
 
-  // Toast + son quand un achievement est débloqué
+  // Toast + son quand un achievement est débloqué (groupé anti-spam).
+  // Plusieurs achievements peuvent unlock en cascade (passer wave 50 débloque
+  // wave_50, wave_warrior, wave_conqueror en même temps). On les regroupe en
+  // 1 seul toast par fenêtre de 500ms pour ne pas spammer.
+  let _achievQueue = [];
+  let _achievTimer = null;
   AchievementSystem.onUnlock((ach) => {
     SoundSystem.play('achievement');
-    const toast = document.createElement('div');
-    toast.className = 'achiev-toast';
-    toast.innerHTML = `
-      <span class="achiev-toast-icon">${ach.icon}</span>
-      <div>
-        <div class="achiev-toast-text">ACHIEVEMENT DÉBLOQUÉ</div>
-        <div class="achiev-toast-name">${ach.name} — ${ach.desc}</div>
-      </div>
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    _achievQueue.push(ach);
+    if (_achievTimer) return; // un flush est déjà prévu
+
+    _achievTimer = setTimeout(async () => {
+      const batch = _achievQueue.splice(0, _achievQueue.length);
+      _achievTimer = null;
+      if (batch.length === 0) return;
+
+      const { Toast } = await import('./ui/ToastSystem.js');
+      if (batch.length === 1) {
+        const a = batch[0];
+        Toast.reward('Achievement débloqué', {
+          icon: a.icon || '🏆',
+          desc: `${a.name} — ${a.desc}`,
+          duration: 4000,
+        });
+      } else {
+        // Cascade : 1 seul toast récap
+        const names = batch.slice(0, 3).map(a => a.name).join(', ');
+        const more = batch.length > 3 ? ` +${batch.length - 3} autres` : '';
+        Toast.reward(`🏆 ${batch.length} achievements débloqués !`, {
+          desc: `${names}${more}`,
+          duration: 5000,
+        });
+      }
+    }, 500);
   });
 
   // Toast visible pour TOUT item drop (surtout les epic/legendary/mythic)

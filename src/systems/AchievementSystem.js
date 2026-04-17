@@ -84,19 +84,37 @@ class AchievementSystemImpl {
   }
 
   _checkUnlocks() {
-    for (const ach of ACHIEVEMENTS) {
-      if (this.unlocked[ach.id]) continue;
-      const current = this.trackers[ach.tracker] || 0;
-      if (current >= ach.target) {
-        this.unlocked[ach.id] = true;
-        // Distribue la récompense
-        if (ach.reward.gold) ResourceSystem.addGold(ach.reward.gold);
-        if (ach.reward.gems) ResourceSystem.addGems(ach.reward.gems);
-        // Notifie les listeners (toast)
-        for (const fn of this._listeners) {
-          try { fn(ach); } catch (e) {}
+    // Protection anti-reentree : si _checkUnlocks est appele recursivement
+    // (ex: un listener qui increment un tracker → loop), on abort.
+    if (this._checkingUnlocks) return;
+    this._checkingUnlocks = true;
+
+    try {
+      // Hard cap : max 20 unlocks par appel (securite anti-boucle infinie)
+      let unlockedThisCall = 0;
+      for (const ach of ACHIEVEMENTS) {
+        if (this.unlocked[ach.id]) continue;
+        // Guard : target doit être un nombre positif
+        if (typeof ach.target !== 'number' || ach.target <= 0) continue;
+        const current = this.trackers[ach.tracker] || 0;
+        if (current >= ach.target) {
+          this.unlocked[ach.id] = true;
+          unlockedThisCall++;
+          // Distribue la récompense
+          if (ach.reward?.gold) ResourceSystem.addGold(ach.reward.gold);
+          if (ach.reward?.gems) ResourceSystem.addGems(ach.reward.gems);
+          // Notifie les listeners (toast, etc.)
+          for (const fn of this._listeners) {
+            try { fn(ach); } catch (e) {}
+          }
+          if (unlockedThisCall >= 20) {
+            console.warn('[AchievementSystem] Cap 20 unlocks/call atteint — safeguard');
+            break;
+          }
         }
       }
+    } finally {
+      this._checkingUnlocks = false;
     }
   }
 
