@@ -60,6 +60,15 @@ export class SummonScreen {
             </div>
             <span>${pity.ur}/${pity.urMax}</span>
           </div>
+          ${pity.mythic >= pity.mythicMax / 2 ? `
+          <div class="summon-pity-bar" title="La rareté Mythique (0.01%) est garantie à ${pity.mythicMax} pulls.">
+            <span style="color:#ff6b9d">Pity Mythique</span>
+            <div class="progress-bar" style="height:8px;flex:1;margin:0 8px;">
+              <div class="progress-bar-fill" style="width:${(pity.mythic/pity.mythicMax)*100}%;background:#ff6b9d;"></div>
+            </div>
+            <span>${pity.mythic}/${pity.mythicMax}</span>
+          </div>
+          ` : ''}
         </div>
 
         <div class="summon-buttons">
@@ -116,7 +125,8 @@ export class SummonScreen {
 
     const r = results[index];
     const rarityInfo = HERO_RARITIES[r.rarity];
-    const duration = r.rarity === 'UR' ? 2500 : r.rarity === 'SSR' ? 2000 : r.rarity === 'SR' ? 1200 : 800;
+    // MYTHIC prolongé (3500ms) — drop 0.01% qui mérite une révélation dilatée.
+    const duration = r.rarity === 'MYTHIC' ? 3500 : r.rarity === 'UR' ? 2500 : r.rarity === 'SSR' ? 2000 : r.rarity === 'SR' ? 1200 : 800;
 
     // Phrase de reveal du héros (import statique en haut du fichier)
     const revealSpeech = getRevealSpeech(r.hero.id) || '';

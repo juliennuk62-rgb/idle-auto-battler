@@ -168,6 +168,8 @@ export class GachaSystemImpl {
       ssrMax: BALANCE.gacha.pitySSR,
       ur: this.pityUR,
       urMax: BALANCE.gacha.pityUR,
+      mythic: this.pityMYTHIC,
+      mythicMax: 200, // voir _roll() — cohérent avec le pity MYTHIC appliqué
     };
   }
 
@@ -227,6 +229,7 @@ export class GachaSystemImpl {
         assigned: this.assignedHeroes,
         pitySSR: this.pitySSR,
         pityUR: this.pityUR,
+        pityMYTHIC: this.pityMYTHIC,
       }));
     } catch (e) {}
   }
@@ -240,6 +243,8 @@ export class GachaSystemImpl {
         this.assignedHeroes = data.assigned || {};
         this.pitySSR = data.pitySSR || 0;
         this.pityUR = data.pityUR || 0;
+        // Backward-compat : anciens saves n'ont pas pityMYTHIC.
+        this.pityMYTHIC = data.pityMYTHIC || 0;
         // Migration u1-u4 → slot_1-slot_5
         const ID_MIG = { u1: 'slot_1', u2: 'slot_2', u3: 'slot_3', u4: 'slot_4', u5: 'slot_5' };
         const newAssigned = {};
@@ -260,6 +265,7 @@ export class GachaSystemImpl {
       assigned: this.assignedHeroes,
       pitySSR: this.pitySSR,
       pityUR: this.pityUR,
+      pityMYTHIC: this.pityMYTHIC,
     };
   }
 
@@ -269,6 +275,7 @@ export class GachaSystemImpl {
     this.assignedHeroes = data.assigned || {};
     this.pitySSR = data.pitySSR || 0;
     this.pityUR = data.pityUR || 0;
+    this.pityMYTHIC = data.pityMYTHIC || 0;
     this._save();
   }
 }
