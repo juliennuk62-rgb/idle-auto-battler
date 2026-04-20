@@ -12,6 +12,7 @@ const MILESTONES = [
   { count: 10, label: 'Collecteur',        bonus: '+5% XP permanent',  icon: '🥈' },
   { count: 15, label: 'Maître',            bonus: '+10% ATK permanent', icon: '🥇' },
   { count: 20, label: 'Collectionneur Ultime', bonus: 'Titre + cadre doré', icon: '👑' },
+  { count: 22, label: 'Maître Absolu',         bonus: 'Cadre arc-en-ciel + titre Légendaire', icon: '🌌' },
 ];
 
 export class CollectionScreen {

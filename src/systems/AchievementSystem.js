@@ -36,7 +36,8 @@ const ACHIEVEMENTS_BASE = [
   // ── Légendaire ──
   { id: 'wave_100',       name: 'Légende',            desc: 'Atteignez la vague 100',              icon: '🏆', tracker: 'max_wave',     target: 100,    reward: { gems: 25 },     tier: 'legendary' },
   { id: 'kills_50k',      name: 'Génocidaire',        desc: 'Tuez 50 000 monstres',                icon: '☠',  tracker: 'kills',        target: 50000,  reward: { gems: 25 },     tier: 'legendary' },
-  { id: 'heroes_20',      name: 'Ultime Collectionneur', desc: 'Possédez les 20 héros',            icon: '👑', tracker: 'heroes_owned', target: 20,     reward: { gems: 50 },     tier: 'legendary' },
+  { id: 'heroes_20',      name: 'Ultime Collectionneur', desc: 'Possédez 20 héros',                icon: '👑', tracker: 'heroes_owned', target: 20,     reward: { gems: 50 },     tier: 'legendary' },
+  { id: 'heroes_22',      name: 'Maître Absolu',         desc: 'Possédez les 22 héros (Mythiques inclus)', icon: '🌌', tracker: 'heroes_owned', target: 22, reward: { gems: 100 },    tier: 'legendary' },
   { id: 'prestige_3',     name: 'Renaissant',         desc: 'Effectuez 3 prestiges',               icon: '♻',  tracker: 'prestiges',    target: 3,      reward: { gems: 20 },     tier: 'legendary' },
   { id: 'infinite_200',   name: 'Sans Limite',        desc: 'Atteignez la vague 200 en mode infini', icon: '∞', tracker: 'infinite_wave', target: 200,  reward: { gems: 50 },     tier: 'legendary' },
 ];

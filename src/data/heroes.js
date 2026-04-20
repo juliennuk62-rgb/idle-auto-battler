@@ -1,4 +1,4 @@
-// Pool de héros invocables — 20 héros (5 par classe × 4 raretés).
+// Pool de héros invocables — 22 héros (5 par classe × 4 raretés + 2 Mythiques).
 // Les héros REMPLACENT les unités de base. Un SSR Guerrier est directement
 // meilleur qu'une Recrue. statMult s'applique sur les stats de base de la classe.
 
