@@ -104,10 +104,11 @@ Le boss a des mécaniques spéciales — observez ses patterns !`,
       },
       {
         heading: 'Raretés',
-        text: `**R (Rare)** — Le plus commun. Bonus stats x1.2
-**SR (Super Rare)** — Peu fréquent. Bonus stats x1.5
-**SSR (Super Super Rare)** — Rare. Bonus stats x2.0 + passif unique
-**UR (Ultra Rare)** — Très rare. Bonus stats x3.0 + passif puissant`,
+        text: `**R (Rare)** — ~70%. Bonus stats ×1.2
+**SR (Super Rare)** — ~20%. Bonus stats ×1.5
+**SSR** — ~8%. Bonus stats ×2.0 + 1 passif unique
+**UR (Ultra Rare)** — ~2%. Bonus stats ×3.0 + 2 passifs puissants
+**Mythique** — 0.01%. Bonus stats ×5.0 + 3 passifs — drop ultra rare`,
       },
       {
         heading: 'Pity System',
@@ -176,16 +177,17 @@ Connectez-vous chaque jour et faites au moins les 3 quotidiennes !`,
     sections: [
       {
         heading: 'Pokédex',
-        text: `Collectionnez les 20 héros du jeu via l'Invocation.
-Les héros non obtenus apparaissent en silhouette avec "???".`,
+        text: `Collectionnez les **22 héros** du jeu via l'Invocation (5 par classe + 2 Mythiques secrets).
+Les héros non obtenus apparaissent en silhouette avec "???".
+Les héros Mythiques ne peuvent être obtenus que via l'Invocation — aucun pity ne les garantit.`,
       },
       {
         heading: 'Milestones',
         text: `Des bonus permanents se débloquent selon votre collection :
-**5 héros** — +5% or
-**10 héros** — +5% XP
-**15 héros** — +10% ATK
-**20 héros** — Titre spécial + cadre doré`,
+**5 héros** — Novice (+5% or)
+**10 héros** — Collecteur (+5% XP)
+**15 héros** — Maître (+10% ATK)
+**20 héros** — Collectionneur Ultime (titre + cadre doré)`,
       },
     ],
   },
@@ -233,19 +235,26 @@ C'est le meilleur moyen d'obtenir des items Épiques et Légendaires.`,
     sections: [
       {
         heading: 'Comment ça marche',
-        text: `Le Prestige reset votre progression (vagues, niveau, or) mais vous donne des Fragments d'Âme.
-Plus vous avez progressé loin, plus vous obtenez de fragments.`,
+        text: `Le Prestige reset votre progression (or, gemmes, équipe, vague) mais vous donne des **Fragments d'Âme**.
+Vous obtenez **1 fragment par tranche de 10 vagues** atteintes (ex : vague 47 → 4 fragments).
+Disponible à partir de la vague 20.
+**Conservés au reset :** fragments d'âme, bonus permanents, statistiques, héros invoqués, achievements.`,
       },
       {
         heading: 'Bonus permanents',
-        text: `Dépensez les fragments dans le catalogue de Prestige pour des bonus permanents :
-+ATK%, +HP%, +Or%, +XP%, +Vitesse d'attaque...
-Ces bonus persistent à travers les Prestiges et s'accumulent.`,
+        text: `Dépensez les fragments dans la boutique de Prestige :
+**+25% Or** (2 ♦) — tous les gains d'or +25%
+**+50% Or** (5 ♦) — cumulable avec le précédent
+**+15% HP** (3 ♦) — toutes les unités alliées
+**+15% ATK** (3 ♦) — toutes les unités alliées
+**Soldat de départ** (5 ♦) — commencez chaque run avec un guerrier grade 2
+Ces bonus persistent à travers tous les Prestiges suivants.`,
       },
       {
         heading: 'Quand prestige ?',
         text: `Prestigez quand vous bloquez et ne progressez plus.
-Un bon moment : après avoir battu le boss d'un nouveau biome pour la première fois.`,
+Un bon moment : après avoir battu le boss d'un nouveau biome pour la première fois,
+ou quand les monstres deviennent trop costauds pour votre équipe.`,
       },
     ],
   },
@@ -257,6 +266,57 @@ Un bon moment : après avoir battu le boss d'un nouveau biome pour la première 
         heading: 'Dashboard',
         text: `Le dashboard affiche vos statistiques globales : monstres tués, or gagné, DPS, temps de jeu...
 Utilisez-le pour suivre votre progression.`,
+      },
+    ],
+  },
+
+  team: {
+    title: 'Guide : Équipe',
+    sections: [
+      {
+        heading: 'Les 5 slots',
+        text: `Votre équipe compte 5 slots : **2 Guerriers**, **1 Archer**, **1 Mage**, **1 Healer**.
+Chaque slot accepte uniquement un héros de la classe correspondante.
+La composition est figée — vous ne pouvez pas remplacer un slot Guerrier par un Mage.`,
+      },
+      {
+        heading: 'Assigner un héros',
+        text: `Cliquez sur **Assigner un héros** pour choisir parmi ceux que vous avez invoqués.
+Un héros assigné applique son **multiplicateur de stats** (×1.2 à ×5.0) sur le slot.
+Un héros ne peut servir que dans un seul slot à la fois (badge "En service").
+Cliquez sur **Retirer** pour le libérer.`,
+      },
+      {
+        heading: 'Astuce',
+        text: `Assignez vos meilleurs héros en priorité — les SSR/UR/Mythiques boostent
+dramatiquement la puissance de l'équipe grâce à leur multiplicateur et leurs passifs.
+Si vous n'avez pas de héros d'une classe, le slot reste fonctionnel (stats de base).`,
+      },
+    ],
+  },
+
+  achievements: {
+    title: 'Guide : Achievements',
+    sections: [
+      {
+        heading: '60 défis',
+        text: `60 achievements à relever, répartis en 4 tiers :
+**Bronze** — premiers pas (ex : premier kill, première équipe)
+**Argent** — milestones intermédiaires (vague 20, 500 kills, 10k or)
+**Or** — objectifs costauds (vague 50, sets complets, 10 héros)
+**Légendaire** — exploits (vague 100, 50k kills, collection complète, 3 prestiges)`,
+      },
+      {
+        heading: 'Récompenses',
+        text: `Chaque achievement verrouille une récompense en or ou gemmes.
+La barre de progression s'incrémente automatiquement au fil du jeu.
+Les achievements se valident seuls — pas besoin de les réclamer manuellement.`,
+      },
+      {
+        heading: 'Astuce',
+        text: `Les trackers tournent en continu, même hors combat.
+Les achievements légendaires sont vos grands objectifs long-terme.
+Certains nécessitent des mécaniques avancées : fusion, forge, set complet, donjon, prestige.`,
       },
     ],
   },

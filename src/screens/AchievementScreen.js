@@ -1,4 +1,4 @@
-// AchievementScreen — liste des 20 achievements avec progression.
+// AchievementScreen — liste des 60 achievements avec progression.
 
 import { AchievementSystem } from '../systems/AchievementSystem.js';
 import { attachGuideButton } from '../ui/GuideModal.js';
@@ -50,7 +50,7 @@ export class AchievementScreen {
     `;
 
     this.el.querySelector('#achiev-back').addEventListener('click', () => this.onNavigate('menu'));
-    attachGuideButton(this.el.querySelector('#achiev-guide'), 'menu');
+    attachGuideButton(this.el.querySelector('#achiev-guide'), 'achievements');
   }
 
   show() { document.body.append(this.el); }
