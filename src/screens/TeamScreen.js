@@ -99,7 +99,7 @@ export class TeamScreen {
 
     // Events
     this.el.querySelector('#team-back').addEventListener('click', () => this.onNavigate('menu'));
-    attachGuideButton(this.el.querySelector('#team-guide'), 'menu');
+    attachGuideButton(this.el.querySelector('#team-guide'), 'team');
 
     this.el.querySelectorAll('[data-action="assign"]').forEach(btn => {
       btn.addEventListener('click', () => {
