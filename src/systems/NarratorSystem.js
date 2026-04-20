@@ -31,6 +31,7 @@ class NarratorSystemImpl {
       pullSR:        { icon: '✨', variant: 'reward' },
       pullSSR:       { icon: '🌟', variant: 'reward' },
       pullUR:        { icon: '🔥', variant: 'reward' },
+      pullMYTHIC:    { icon: '💫', variant: 'reward' },
       streakBad:     { icon: '😔', variant: 'info' },
       streakGood:    { icon: '🍀', variant: 'success' },
       pityBreak:     { icon: '⚡', variant: 'reward' },
@@ -85,7 +86,9 @@ class NarratorSystemImpl {
     }
 
     // Ligne normale selon rareté (probabilité réduite pour les commons — on spamme pas)
-    if (rarity === 'UR')       this.speak('pullUR');
+    // MYTHIC : toujours forcé + durée étendue (événement ultra-rare à ne jamais rater)
+    if (rarity === 'MYTHIC')   this.speak('pullMYTHIC', { force: true, duration: 7000 });
+    else if (rarity === 'UR')  this.speak('pullUR');
     else if (rarity === 'SSR') this.speak('pullSSR');
     else if (rarity === 'SR')  this.speak('pullSR');
     else if (rarity === 'R' && Math.random() < 0.25) this.speak('pullCommon'); // 25% des R

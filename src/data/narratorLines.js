@@ -159,6 +159,33 @@ export const NARRATOR_LINES = {
     "Une aura qui déforme l'espace-temps.",
   ],
 
+  // ─── MYTHIQUE (0.01% — drop ultime du jeu) ──────────────────
+  // Ces lignes ne s'affichent qu'une fois sur 10 000 pulls. Ton : sacré,
+  // biblique, hors-échelle. Le joueur doit sentir qu'il vient d'assister
+  // à un événement que 99% des joueurs ne verront jamais.
+  pullMYTHIC: [
+    "░▓█  M Y T H I Q U E  █▓░",
+    "L'INCONCEVABLE VIENT DE SE PRODUIRE.",
+    "Les probabilités elles-mêmes se prosternent.",
+    "UN HÉROS QUI N'AURAIT JAMAIS DÛ EXISTER.",
+    "═══ 1 SUR 10 000 ═══",
+    "Le temps s'arrête pour saluer ta chance.",
+    "LES DIEUX DEMANDENT TON NOM.",
+    "Tu viens de réécrire l'histoire du jeu.",
+    "═══ LÉGENDE PARMI LES LÉGENDES ═══",
+    "Aucun oracle n'avait prédit ceci.",
+    "UN ÊTRE D'UN AUTRE PLAN RÉPOND.",
+    "Ton écran devrait trembler.",
+    "LES ÉTOILES ELLES-MÊMES JALOUSENT.",
+    "Capture ce moment. Personne ne te croira.",
+    "═══ APOCALYPSE DORÉE ═══",
+    "Le cosmos t'offre son secret le mieux gardé.",
+    "UN HÉROS QUE LES CODEX N'OSENT NOMMER.",
+    "Ta chance vient d'entrer dans l'éternité.",
+    "LES PROBABILITÉS SONT UNE SUGGESTION.",
+    "Tu fais partie du 0.01%. Au sens littéral.",
+  ],
+
   // ─── STREAKS (séquences marquantes) ───────────────────────────
 
   streakBad: [
