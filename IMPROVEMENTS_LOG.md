@@ -117,3 +117,55 @@ Aucun changement visuel structurel — seul le texte du modal d'aide est plus pr
 - Vérifier si d'autres textes du jeu mentionnent encore "20 héros" (ex : OpeningScreen, narrator).
 - Les guides `dungeons`, `map`, `chests` semblent corrects mais n'ont pas été re-vérifiés contre le code réel — à contrôler si un run futur touche ces systèmes.
 - Certains guides très courts (`talents`, `stats`, `inventory`) pourraient être enrichis dans un run futur.
+
+---
+
+## Run du 2026-04-20 17:00 — #2
+**Status :** ✅ Amélioration livrée
+
+**Candidats considérés :**
+- Idée A : Célébrer les pulls MYTHIC (la rareté la plus rare — 0.01%) qui sont actuellement sous-célébrés : pas de narration dédiée (`NarratorSystem.onPull` ne gère pas le cas MYTHIC → rien ne s'affiche), animation de reveal 800ms comme un R, et pity MYTHIC ni sauvegardé ni affiché.
+- Idée B : Créer nouvelles catégories narratorLines (`victory`, `bossEncounter`, `levelUp`) — trop de sites d'appel à identifier, scope trop gros.
+- Idée C : Corriger les commentaires obsolètes "20 héros" dans `heroes.js` ligne 1 et `AchievementSystem.js` desc `heroes_20` — scope trivial mais très faible valeur ajoutée, et touche la même couche "texte" que le run #1.
+- Idée D : Améliorer la lisibilité du hero lore dans le banner SummonScreen — cosmétique pur, peu d'impact.
+
+**Choix :** Idée A — meilleur ROI. Le pull MYTHIC est le moment le plus viralisant/mémorable du jeu (drop 0.01%). Il est aujourd'hui trois fois cassé : narration absente, animation trop courte, pity non persisté. Touche plusieurs couches différentes du run #1 (contenu narration + feedback visuel + logique de sauvegarde). Risque faible (additions rétro-compatibles).
+
+**Problème détecté :**
+- `NarratorSystem.onPull` n'avait pas de branche pour `rarity === 'MYTHIC'` → silence total au moment le plus épique du jeu.
+- Aucune catégorie `pullMYTHIC` dans `NARRATOR_LINES`.
+- Durée d'animation de reveal dans `SummonScreen._animateResult` : MYTHIC tombait dans le fallback `: 800` (comme un R).
+- `pityMYTHIC` incrémenté/reset dans `_roll()` mais **ni sauvegardé** (`_save`) **ni chargé** (`_load`) **ni sérialisé** (`serialize/restore`) → remis à 0 à chaque reload (le joueur perdait sa progression vers le pity garanti).
+- `getPity()` ne retournait pas `mythic/mythicMax` → impossible de l'afficher dans l'UI.
+
+**Action réalisée :**
+- Ajouté la catégorie `pullMYTHIC` (20 lignes) dans `narratorLines.js` avec un ton sacré/biblique/hors-échelle cohérent avec la rareté.
+- Ajouté l'entrée `pullMYTHIC` dans le `styleMap` de `NarratorSystem.speak` (icône 💫, variant reward).
+- Ajouté la branche `if (rarity === 'MYTHIC')` dans `onPull`, forcée (`force:true`) pour bypass le throttle, avec `duration: 7000` ms pour que le joueur ait le temps de lire.
+- Étendu la durée d'animation dans `SummonScreen._animateResult` : MYTHIC → 3500 ms (vs 2500 ms UR). Commentaire en français pour expliquer.
+- Ajouté `pityMYTHIC` dans `_save`, `_load` (avec backward-compat `|| 0`), `serialize`, `restore` de `GachaSystem`.
+- Étendu `getPity()` pour retourner `mythic/mythicMax`.
+- Ajouté une 3ème barre de pity dans `SummonScreen`, affichée conditionnellement quand le joueur a dépassé la moitié du pity (>= 100/200) — évite de polluer l'UI pour les nouveaux joueurs, mais révèle la mécanique quand elle devient pertinente. Couleur assortie au mythique (`#ff6b9d`), tooltip explicatif.
+
+**Fichiers touchés :**
+- `src/data/narratorLines.js` : +27 lignes (nouvelle catégorie `pullMYTHIC` + commentaire de section)
+- `src/systems/NarratorSystem.js` : +3 lignes (styleMap + cas MYTHIC)
+- `src/systems/GachaSystem.js` : +7 lignes (persistence pityMYTHIC + getPity)
+- `src/screens/SummonScreen.js` : +10 / -1 (barre pity + durée animation)
+
+**Lignes modifiées :** +49 / -2 (51 au total)
+
+**Branche :** `auto-improve/2026-04-20-run2`
+
+**Commit(s) :** `de53ca2` auto-improve #2: celebre les pulls MYTHIC (narration + duree + pity visible + save)
+
+**Résultat joueur :** Quand un joueur tire un MYTHIC (l'événement le plus rare du jeu) :
+- Il voit une ligne de narration épique (« L'INCONCEVABLE VIENT DE SE PRODUIRE. » ou une autre des 20 lignes) qui reste 7s à l'écran.
+- L'animation de révélation dure 3.5s (vs 0.8s avant) — il a le temps de savourer.
+- Sa progression vers le pity MYTHIC garanti (200 pulls) est enfin sauvegardée entre les sessions.
+- Quand il approche du pity (>= 100 pulls sans MYTHIC), une 3ème barre rose apparaît dans le SummonScreen pour l'encourager à continuer.
+
+**À surveiller au run suivant :**
+- Vérifier l'apparence sur petits écrans que la 3ème barre de pity (quand elle apparaît) ne pousse pas les boutons ×1/×10 hors viewport.
+- La catégorie `MYTHIC` n'a pas d'entrée dans `_styleMap` au-delà du toast ; on pourrait aussi ajouter une signalétique visuelle spécifique sur le toast (bordure rose, glow) dans un run futur de polish.
+- Penser à corriger les commentaires obsolètes "20 héros" dans `heroes.js` et la desc de l'achievement `heroes_20` (le jeu en a 22). Scope trivial — garder comme idée de backlog.
