@@ -55,25 +55,25 @@
 
 .menu-container {
   text-align: center;
-  max-width: 700px;
-  width: 95%;
-  padding: 20px 16px;
+  max-width: var(--container-max-narrow);
+  width: 100%;
+  padding: var(--container-padding);
+  margin: 0 auto;
 }
 
 .menu-title {
   font-family: var(--font-pixel);
-  font-size: 28px;
+  font-size: clamp(20px, 3.2vw, 32px);
   color: var(--gold);
   margin-bottom: 6px;
-  letter-spacing: 3px;
+  letter-spacing: clamp(1px, 0.3vw, 3px);
 }
 
 .menu-subtitle {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-tertiary);
-  margin-bottom: 10px;
-  margin-bottom: 40px;
+  margin-bottom: clamp(20px, 4vw, 40px);
 }
 
 .menu-buttons {
@@ -2645,10 +2645,11 @@ li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: var(--gap-normal);
   width: 100%;
-  max-width: 520px;
-  padding: 20px;
+  max-width: var(--container-max-narrow);
+  padding: var(--container-padding);
+  margin: 0 auto;
 }
 
 /* ── Header ──────────────────────────────────────── */
@@ -3411,10 +3412,11 @@ li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: var(--gap-normal);
   width: 100%;
-  max-width: 560px;
-  padding: 20px;
+  max-width: var(--container-max-narrow);
+  padding: var(--container-padding);
+  margin: 0 auto;
 }
 
 .chest-header {
@@ -3939,10 +3941,11 @@ li {
 .mission-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--gap-normal);
   width: 100%;
-  max-width: 520px;
-  padding: 20px;
+  max-width: var(--container-max-narrow);
+  padding: var(--container-padding);
+  margin: 0 auto;
 }
 
 .mission-header {
@@ -4173,10 +4176,11 @@ li {
 .collection-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--gap-normal);
   width: 100%;
-  max-width: 560px;
-  padding: 20px;
+  max-width: var(--container-max-narrow);
+  padding: var(--container-padding);
+  margin: 0 auto;
 }
 
 .collection-header {
@@ -5367,7 +5371,7 @@ li {
    ═══════════════════════════════════════════════════════════ */
 
 .team-screen { display: flex; align-items: flex-start; justify-content: center; padding-top: 20px; background: var(--bg-root); }
-.team-container { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 540px; padding: 20px; }
+.team-container { display: flex; flex-direction: column; gap: var(--gap-normal); width: 100%; max-width: var(--container-max-narrow); padding: var(--container-padding); margin: 0 auto; }
 .team-header { display: flex; align-items: center; gap: 12px; }
 .team-title { font-family: var(--font-pixel); font-size: 16px; color: var(--gold); letter-spacing: 2px; flex: 1; text-align: center; }
 
@@ -5697,6 +5701,37 @@ li {
   --space-5: 24px;
   --space-6: 32px;
   --space-8: 48px;
+
+  /* ─── Responsive fluide (G13) ──────────────────────────────────
+     Système qui s'étire de 320px à 1600px+ sans media queries.
+     Au-delà de 1600px, on clamp pour éviter l'explosion UI.      */
+
+  /* Largeur max des containers principaux — centré sur grand écran */
+  --container-max: min(1400px, 95vw);
+  --container-max-narrow: min(900px, 94vw);  /* menus, modales */
+  --container-max-wide: min(1600px, 98vw);   /* combat, inventaire */
+
+  /* Paddings fluides : plus petit sur mobile, plus aéré sur desktop */
+  --container-padding: clamp(10px, 2.5vw, 32px);
+  --card-padding: clamp(8px, 1.8vw, 20px);
+
+  /* Gaps fluides entre éléments */
+  --gap-tight: clamp(4px, 0.8vw, 10px);
+  --gap-normal: clamp(8px, 1.5vw, 16px);
+  --gap-loose: clamp(12px, 2.5vw, 24px);
+
+  /* Tailles de police fluides (mobile → desktop) */
+  --fs-xs: clamp(9px, 0.9vw, 11px);
+  --fs-sm: clamp(11px, 1.1vw, 13px);
+  --fs-base: clamp(12px, 1.3vw, 15px);
+  --fs-md: clamp(14px, 1.6vw, 18px);
+  --fs-lg: clamp(16px, 2.2vw, 22px);
+  --fs-xl: clamp(20px, 3vw, 32px);
+  --fs-hero: clamp(24px, 4vw, 48px);
+
+  /* Tailles de grilles (cartes d'item, héros, etc.) */
+  --item-size: clamp(48px, 6vw, 80px);
+  --card-min: clamp(180px, 20vw, 260px);
 
   /* Radius cohérents */
   --radius-sm: 6px;
@@ -6654,9 +6689,9 @@ li {
 }
 
 .bestiary-container {
-  max-width: 1200px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 16px;
+  padding: var(--container-padding);
   padding-bottom: 60px;
 }
 
@@ -7774,5 +7809,86 @@ li {
   }
   .inv-filter-group {
     gap: 3px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   G13 — ULTRA-WIDE (>1600px) : garde les containers centrés, aère les menus
+   et évite l'explosion des tailles sur 4K/ultrawide.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 1600px) {
+  /* Menu principal : plus aéré, boutons plus grands */
+  .menu-container {
+    max-width: 1100px;
+  }
+  .menu-buttons {
+    gap: 14px;
+  }
+  .menu-btn {
+    min-height: 100px;
+  }
+  .menu-btn-xl {
+    min-height: 140px;
+  }
+
+  /* Banner invocation : plus spacieux */
+  .summon-container {
+    max-width: 1100px;
+  }
+  .summon-banner {
+    padding: 40px 48px;
+  }
+
+  /* Chest / Missions / Collection : profitent de l'espace */
+  .chest-container,
+  .mission-container,
+  .collection-container,
+  .team-container {
+    max-width: 1100px;
+  }
+
+  /* Bestiary : largeur maximale pour ne pas étirer sans fin */
+  .bestiary-container {
+    max-width: 1600px;
+  }
+
+  /* Inventaire : plus large, side panel plus gros */
+  .inv-main-grid {
+    grid-template-columns: 1fr 340px;
+  }
+
+  /* Modales : légèrement plus grandes */
+  .modal-panel {
+    max-width: min(1200px, 90vw) !important;
+  }
+}
+
+/* Ultra-wide extrême (>2200px) — on évite le vide immense */
+@media (min-width: 2200px) {
+  body {
+    font-size: 18px; /* légère upscale globale */
+  }
+  .menu-container,
+  .summon-container,
+  .chest-container,
+  .mission-container,
+  .collection-container,
+  .team-container {
+    max-width: 1400px;
+  }
+}
+
+/* Petit écran haut (phone portrait court, <= 640px de haut) : compacte vertical */
+@media (max-height: 640px) and (orientation: portrait) {
+  .menu-title {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+  .menu-subtitle {
+    margin-bottom: 8px;
+  }
+  .menu-section-label {
+    margin-top: 8px;
   }
 }

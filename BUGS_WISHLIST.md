@@ -59,7 +59,7 @@ Si tous les items de cette liste sont déjà cochés, retombe sur la recherche l
 
 - [x] **#G8 — Refonte globale inventaire avec filtre + tri haut de gamme** ✅ Session manuelle 2026-04-20 (v4.0) — toolbar compteur + search + filtres rareté/set/équipé + tri 6 options + batch sell par rareté + comparateur diff ATK/HP + badges ON/tier + responsive mobile.
 - [x] **#G10 — Refonte invocations/coffres "grosse dopamine"** ✅ Session manuelle 2026-04-20 (v3.9 + v4.0) — invocations (suspense/crash/aura/typewriter) + coffres (stars bg / aura pulse / halo glow / 8 rays divergents / screen shake / vibration / skip button / sons).
-- [ ] **#G13 — UI 100% étirable auto responsive**
+- [x] **#G13 — UI 100% étirable auto responsive** ✅ Session manuelle 2026-04-20 (v4.1) — variables fluides (`--container-max`, `--fs-*` via clamp), containers principaux refondus (menu/invocation/coffres/missions/collection/team/bestiaire), Modal.js auto-responsive, 3 breakpoints ajoutés (≥1600px ultra-wide / ≥2200px 4K / portrait court).
 
 ---
 

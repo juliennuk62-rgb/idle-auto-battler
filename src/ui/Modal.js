@@ -30,7 +30,10 @@ export class Modal {
     // Panel
     this.panel = document.createElement('div');
     this.panel.className = 'modal-panel';
-    this.panel.style.maxWidth = `${this.options.width ?? 900}px`;
+    // Responsive : max-width = min(width souhaitée, 95vw)
+    // Évite que la modale déborde sur petit écran et reste centrée sur grand.
+    const w = this.options.width ?? 900;
+    this.panel.style.maxWidth = `min(${w}px, 95vw)`;
 
     // Header
     const header = document.createElement('div');
