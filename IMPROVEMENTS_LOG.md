@@ -218,3 +218,41 @@ Les joueurs qui lisaient le guide talents ne seront plus surpris par le coût de
 - Le milestone "cadre arc-en-ciel" est déclaré dans `MILESTONES` mais le CSS de CollectionScreen n'a pas de style dédié `.milestone-rainbow` — le milestone s'affiche correctement (done/not done) mais sans animation spéciale. Un run futur de polish CSS pourrait ajouter un effet arc-en-ciel.
 - Vérifier l'apparence de la 3ème barre de pity sur petits écrans (signalé au run #2, toujours en backlog).
 - L'achievement `heroes_22` utilise le tracker `heroes_owned` qui compte les héros distincts obtenus via GachaSystem — à vérifier que la valeur est bien incrémentée lors d'un pull Mythique (test manuel recommandé).
+
+---
+
+## Run du 2026-04-22 16:33 — #4
+**Status :** ✅ Amélioration livrée
+
+**Candidats considérés :**
+- Idée A : Narrator lines pour boss kills + handler NarratorSystem.onBossKill() — impact moyen-fort (tous les joueurs, toutes les 5 vagues), effort petit, risque très faible.
+- Idée B : CSS arc-en-ciel pour le milestone 22 héros dans CollectionScreen — impact très faible (seulement les joueurs avec 22 héros), effort trivial, risque très faible.
+- Idée C : Daily reward amélioré (afficher la prochaine récompense) — impact moyen, effort petit, risque faible.
+- Idée D : Narrator lines pour jalons de vagues (wave 25/50/100) — impact moyen, effort moyen (trouver le bon site d'appel).
+
+**Choix :** Idée A — meilleur ROI. Les boss kills sont le troisième moment fort du jeu (après les pulls et les crits) et étaient totalement silencieux côté narration. Toutes les 5 vagues, chaque joueur tue un boss sans aucun commentaire narratif. 3 fichiers touchés, 36 lignes ajoutées, zéro risque (additions pures, pattern déjà utilisé dans le fichier).
+
+**Problème détecté :** Le NarratorSystem couvrait les pulls (gacha), les loots (items) et les crits massifs, mais aucun événement de combat aussi fort qu'un boss kill n'avait de ligne narrateur associée. Le boss mourait dans le silence — seul le waveBanner (pour les boss scénarisés) et le son bossDeath réagissaient.
+
+**Action réalisée :**
+- Ajouté la catégorie `bossKill` dans `narratorLines.js` (20 lignes au ton triomphal/dramatique, cohérent avec le reste du système).
+- Ajouté `bossKill: { icon: '💀', variant: 'reward' }` dans le styleMap de NarratorSystem.
+- Ajouté `onBossKill()` handler dans NarratorSystem (force: true, duration: 3000ms).
+- Ajouté l'appel `import('./NarratorSystem.js').then(...)` dans CombatSystem à la fin du bloc `if (isBossKill)`, après la découverte Bestiaire — même pattern que les autres appels narrator du fichier.
+
+**Fichiers touchés :**
+- `src/data/narratorLines.js` : +25 lignes (section bossKill — 20 lignes + en-tête)
+- `src/systems/NarratorSystem.js` : +6 lignes (styleMap entry + handler onBossKill)
+- `src/systems/CombatSystem.js` : +5 lignes (import dynamique + appel onBossKill)
+
+**Lignes modifiées :** +36 / -0 (36 au total)
+
+**Branche :** `auto-improve/2026-04-22-1633`
+
+**Commit(s) :** `1cf0575` auto-improve: narrator bossKill — 20 lignes épiques + handler + appel combat
+
+**Résultat joueur :** À chaque boss vaincu (toutes les 5 vagues), un toast narrateur apparaît 3s avec une ligne épique (ex : « BOSS VAINCU. », « LE GARDIEN TOMBE, LE CHEMIN S'OUVRE. », « ═══ VICTOIRE ÉPIQUE ═══ », etc.). Le moment boss devient aussi dramatique côté narration que côté effets visuels (shake/zoom/slow-mo déjà en place).
+
+**À surveiller au run suivant :**
+- Si le boss drop un item légendaire juste après sa mort, deux toasts forcés apparaissent quasi simultanément (bossKill + lootLegendary). À surveiller si l'UX est gênante — si oui, passer le bossKill narrator dans un `delayedCall(400)` pour laisser le waveBanner s'installer d'abord.
+- Le CSS arc-en-ciel du milestone 22 héros (CollectionScreen) reste un backlog de polish à traiter dans un prochain run.
