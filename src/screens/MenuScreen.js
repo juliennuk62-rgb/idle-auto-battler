@@ -58,7 +58,7 @@ export class MenuScreen {
             <span class="menu-btn-label">COFFRES</span>
             <span class="menu-btn-desc">Runes de Boost</span>
           </button>
-          <button class="menu-btn menu-btn-mission" data-nav="missions">
+          <button class="menu-btn menu-btn-mission" data-nav="missions" data-badge-host="missions">
             <span class="menu-btn-icon">📋</span>
             <span class="menu-btn-label">MISSIONS</span>
             <span class="menu-btn-desc">Objectifs quotidiens</span>
@@ -79,7 +79,7 @@ export class MenuScreen {
             <span class="menu-btn-label">ÉQUIPE</span>
             <span class="menu-btn-desc">Composez votre escouade</span>
           </button>
-          <button class="menu-btn" data-nav="inventory">
+          <button class="menu-btn" data-nav="inventory" data-badge-host="inventory">
             <span class="menu-btn-icon">🎒</span>
             <span class="menu-btn-label">INVENTAIRE</span>
             <span class="menu-btn-desc">Équipement et forge</span>
@@ -240,6 +240,41 @@ export class MenuScreen {
         }
       });
     });
+
+    // Listeners live pour les badges (inventaire + missions).
+    // BUG FIX : sans ça, le badge reste affiché après ouverture de l'inventaire
+    // car le menu n'est pas re-rendu à la fermeture de la modale.
+    this._badgeUnsub = [];
+
+    // Inventaire : ItemSystem émet 'unread_changed' quand un item drop ou markAllAsRead
+    const onUnreadChanged = (count) => this._refreshBadge('inventory', count);
+    ItemSystem.on('unread_changed', onUnreadChanged);
+    this._badgeUnsub.push(() => ItemSystem.off('unread_changed', onUnreadChanged));
+
+    // Missions : refresh le badge quand une mission se complète pendant l'affichage du menu
+    const unsubMission = MissionSystem.onMissionComplete(() => {
+      this._refreshBadge('missions', MissionSystem.getClaimableCount());
+    });
+    this._badgeUnsub.push(unsubMission);
+  }
+
+  /** Met à jour le badge d'un bouton menu sans re-render complet. */
+  _refreshBadge(hostKey, count) {
+    const btn = this.el?.querySelector(`[data-badge-host="${hostKey}"]`);
+    if (!btn) return;
+    const existing = btn.querySelector('.menu-btn-badge');
+    if (count > 0) {
+      if (existing) {
+        existing.textContent = String(count);
+      } else {
+        const badge = document.createElement('span');
+        badge.className = 'menu-btn-badge';
+        badge.textContent = String(count);
+        btn.appendChild(badge);
+      }
+    } else if (existing) {
+      existing.remove();
+    }
   }
 
   show() {
@@ -292,6 +327,13 @@ export class MenuScreen {
   }
 
   hide() {
+    // Nettoie les listeners de badges pour éviter les fuites mémoire.
+    if (this._badgeUnsub) {
+      for (const fn of this._badgeUnsub) {
+        try { fn(); } catch {}
+      }
+      this._badgeUnsub = null;
+    }
     this.el.remove();
   }
 }
