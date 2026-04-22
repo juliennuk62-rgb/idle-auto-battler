@@ -38,6 +38,7 @@ class NarratorSystemImpl {
       lootCommon:    { icon: '💎', variant: 'info' },
       lootLegendary: { icon: '🌠', variant: 'reward' },
       critMassive:   { icon: '⚔', variant: 'error' },
+      bossKill:      { icon: '💀', variant: 'reward' },
     };
     const style = styleMap[category] || { icon: '🔮', variant: 'info' };
     const method = Toast[style.variant] || Toast.info;
@@ -102,6 +103,11 @@ class NarratorSystemImpl {
       // Ligne commune 10% du temps pour donner de la couleur sans spam
       this.speak('lootCommon');
     }
+  }
+
+  /** Appelé à chaque kill de boss. */
+  onBossKill() {
+    this.speak('bossKill', { force: true, duration: 3000 });
   }
 
   /** Appelé sur un coup critique massif. */

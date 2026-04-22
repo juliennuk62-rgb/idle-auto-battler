@@ -347,6 +347,31 @@ export const NARRATOR_LINES = {
     "Le hasard devient générosité divine.",
   ],
 
+  // ─── COMBAT (boss kills) ─────────────────────────────────────
+
+  bossKill: [
+    "BOSS VAINCU.",
+    "Le titan s'effondre.",
+    "LE GARDIEN TOMBE, LE CHEMIN S'OUVRE.",
+    "Les monstres rampent dans l'ombre du vaincu.",
+    "Un boss de moins. Une légende de plus.",
+    "═══ VICTOIRE ÉPIQUE ═══",
+    "Les dieux applaudissent ce carnage.",
+    "LE BOSS CÈDE SA COURONNE.",
+    "La vague tremble devant tes héros.",
+    "Un colosse à tes pieds.",
+    "═══ BOSS ÉLIMINÉ ═══",
+    "Ton équipe transcende sa condition.",
+    "LE GARDIEN A SOUS-ESTIMÉ SES ENNEMIS.",
+    "La citadelle des monstres se lézarde.",
+    "Un boss tombe. Dix autres frémissent.",
+    "TON ÉQUIPE DEVIENT MYTHE.",
+    "Les annales enregistrent cette victoire.",
+    "Le boss expire, la vague pleure.",
+    "═══ TERRAIN CONQUIS ═══",
+    "Le cosmos te couronne vainqueur.",
+  ],
+
   // ─── COMBAT (crits massifs) ──────────────────────────────────
 
   critMassive: [

@@ -535,6 +535,11 @@ export class CombatSystem {
         if (target._scriptedBossId) {
           BestiarySystem.discoverBoss(target._scriptedBossId);
         }
+
+        // Narration épique sur chaque boss kill
+        import('./NarratorSystem.js').then(({ NarratorSystem }) => {
+          NarratorSystem.onBossKill();
+        });
       }
     }
 
