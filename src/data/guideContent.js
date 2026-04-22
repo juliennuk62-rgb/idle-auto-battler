@@ -187,7 +187,8 @@ Les héros Mythiques ne peuvent être obtenus que via l'Invocation — aucun pit
 **5 héros** — Novice (+5% or)
 **10 héros** — Collecteur (+5% XP)
 **15 héros** — Maître (+10% ATK)
-**20 héros** — Collectionneur Ultime (titre + cadre doré)`,
+**20 héros** — Collectionneur Ultime (titre + cadre doré)
+**22 héros** — Maître Absolu (cadre arc-en-ciel — Mythiques inclus)`,
       },
     ],
   },
@@ -203,7 +204,7 @@ Dépensez des points de talent pour débloquer des bonus passifs (ATK%, HP%, vit
       {
         heading: 'Points de talent',
         text: `Vous gagnez des points de talent en montant de niveau vos unités.
-Vous pouvez reset les talents gratuitement pour tester d'autres builds.`,
+Vous pouvez reset les talents pour 5 gemmes afin de tester d'autres builds.`,
       },
     ],
   },

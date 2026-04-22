@@ -169,3 +169,52 @@ Aucun changement visuel structurel — seul le texte du modal d'aide est plus pr
 - Vérifier l'apparence sur petits écrans que la 3ème barre de pity (quand elle apparaît) ne pousse pas les boutons ×1/×10 hors viewport.
 - La catégorie `MYTHIC` n'a pas d'entrée dans `_styleMap` au-delà du toast ; on pourrait aussi ajouter une signalétique visuelle spécifique sur le toast (bordure rose, glow) dans un run futur de polish.
 - Penser à corriger les commentaires obsolètes "20 héros" dans `heroes.js` et la desc de l'achievement `heroes_20` (le jeu en a 22). Scope trivial — garder comme idée de backlog.
+
+---
+
+## Run du 2026-04-20 17:35 — #3
+**Status :** ✅ Amélioration livrée
+
+**Candidats considérés :**
+- Idée A : Compléter la progression collection jusqu'à 22 héros (milestone + achievement manquants) — impact moyen, effort petit, risque très faible.
+- Idée B : Corriger le guide `talents` (dit "reset gratuit" mais coûte 5 gemmes en réalité) — impact faible, effort trivial.
+- Idée C : Ajouter narrator lines pour bossKill/victory — effort moyen (identifier call sites), risque faible.
+- Idée D : Enrichir le guide `stats` (1 section très maigre) — impact faible.
+
+**Choix :** Idées A + B combinées — complétion naturelle des runs précédents, 4 fichiers max, scope très serré. Le LOG #2 mentionnait ces fixes comme backlog prioritaire.
+
+**Problème détecté :**
+- Le jeu a 22 héros (dont 2 Mythiques) mais la progression de collection s'arrêtait à 20 : aucun milestone ni achievement ne récompensait la vraie complétion (22/22). Les joueurs qui obtiennent les 2 Mythiques ne reçoivent rien.
+- Le guide `talents` disait "reset **gratuitement**" alors que le `TalentModal` coûte 5 gemmes (vérifié dans `TalentModal.js` lignes 131–136).
+- Commentaire obsolète dans `heroes.js` ligne 1 : "20 héros" alors qu'il y en a 22.
+
+**Action réalisée :**
+- Ajouté milestone `{ count: 22, label: 'Maître Absolu', bonus: 'Cadre arc-en-ciel + titre Légendaire', icon: '🌌' }` dans `CollectionScreen.js`.
+- Corrigé la desc de l'achievement `heroes_20` : "Possédez **les** 20 héros" → "Possédez 20 héros" (supprime le "les" qui impliquait la totalité).
+- Ajouté achievement `heroes_22` (Maître Absolu) : target 22, reward 100 gemmes, tier legendary — récompense la vraie complétion.
+- Ajouté "**22 héros** — Maître Absolu" dans le guide collection.
+- Corrigé "gratuitement" → "pour 5 gemmes" dans le guide talents.
+- Corrigé commentaire `heroes.js` ligne 1 : "20 héros" → "22 héros".
+
+**Fichiers touchés :**
+- `src/data/heroes.js` : correction commentaire ligne 1
+- `src/systems/AchievementSystem.js` : fix desc heroes_20 + ajout heroes_22
+- `src/screens/CollectionScreen.js` : ajout milestone 22 héros
+- `src/data/guideContent.js` : milestone 22 dans guide collection + fix "gratuit"→"5 gemmes" guide talents
+
+**Lignes modifiées :** +7 / -4 (11 au total)
+
+**Branche :** `auto-improve/2026-04-20-1735`
+
+**Commit(s) :** `ac88829` auto-improve #3: completer collection 22 heros (milestone + achievement + guide talents)
+
+**Résultat joueur :** Les joueurs qui réussissent l'exploit d'obtenir les 2 héros Mythiques (Titan Originel et Chronomancien) voient maintenant :
+- Un 5ème milestone dans l'écran Collection (cadre arc-en-ciel, titre Légendaire).
+- Un achievement déblocable "Maître Absolu" qui récompense 100 gemmes.
+- Le guide collection qui mentionne l'existence de ce palier final.
+Les joueurs qui lisaient le guide talents ne seront plus surpris par le coût de 5 gemmes du reset.
+
+**À surveiller au run suivant :**
+- Le milestone "cadre arc-en-ciel" est déclaré dans `MILESTONES` mais le CSS de CollectionScreen n'a pas de style dédié `.milestone-rainbow` — le milestone s'affiche correctement (done/not done) mais sans animation spéciale. Un run futur de polish CSS pourrait ajouter un effet arc-en-ciel.
+- Vérifier l'apparence de la 3ème barre de pity sur petits écrans (signalé au run #2, toujours en backlog).
+- L'achievement `heroes_22` utilise le tracker `heroes_owned` qui compte les héros distincts obtenus via GachaSystem — à vérifier que la valeur est bien incrémentée lors d'un pull Mythique (test manuel recommandé).
