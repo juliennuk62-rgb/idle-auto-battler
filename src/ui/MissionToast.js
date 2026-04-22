@@ -11,8 +11,8 @@ export class MissionToast {
   constructor() {
     this._unsub = MissionSystem.onMissionComplete((mission) => {
       const rewardText = mission.reward.gold
-        ? `+${mission.reward.gold} or`
-        : `+${mission.reward.gems} gemme${mission.reward.gems > 1 ? 's' : ''}`;
+        ? `+${mission.reward.gold.toLocaleString('fr-FR')} 💰`
+        : `+${mission.reward.gems} ◇`;
 
       Toast.reward('Mission complétée', {
         desc: `${mission.label} — ${rewardText}`,

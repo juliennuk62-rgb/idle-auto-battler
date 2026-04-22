@@ -1846,6 +1846,20 @@ li {
   transition: transform 150ms, box-shadow 150ms;
 }
 
+/* Fond teinté selon le type d'équipement (lisibilité visuelle immédiate) */
+.inv-item[data-type="weapon"] {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(120, 20, 20, 0.25));
+  border-color: rgba(220, 38, 38, 0.4);
+}
+.inv-item[data-type="armor"] {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(30, 60, 120, 0.25));
+  border-color: rgba(59, 130, 246, 0.4);
+}
+.inv-item[data-type="accessory"] {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(20, 90, 40, 0.25));
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
 .inv-item:hover {
   transform: scale(1.08);
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
@@ -3687,6 +3701,35 @@ li {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mission-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.mission-reward-icon {
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.mission-reward-icon.reward-gold {
+  filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.6));
+}
+
+.mission-reward-icon.reward-gems {
+  color: #60a5fa;
+  text-shadow: 0 0 4px rgba(96, 165, 250, 0.6);
 }
 
 .mission-ready {
@@ -6680,4 +6723,131 @@ li {
   .bestiary-card { padding: 8px; gap: 4px; }
   .bestiary-card-quote,
   .bestiary-card-lore { font-size: 10px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORGE — indicateur d'or + animation de reveal
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.forge-gold-indicator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.forge-gold-indicator strong {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.forge-gold-sep {
+  color: var(--text-tertiary);
+  opacity: 0.6;
+}
+
+.forge-gold-insufficient {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+.forge-gold-missing {
+  color: var(--damage);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* ─── Overlay reveal forge ────────────────────────────────────────── */
+
+.forge-reveal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: forgeRevealFade 0.25s ease-out;
+  cursor: pointer;
+}
+
+.forge-reveal-card {
+  background: linear-gradient(135deg, rgba(20,20,30,0.95), rgba(10,10,18,0.98));
+  border: 3px solid;
+  border-radius: 12px;
+  padding: 24px 32px;
+  text-align: center;
+  max-width: 80%;
+  animation: forgeRevealPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.forge-reveal-label {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  animation: forgeLabelPulse 1s ease-in-out infinite;
+}
+
+.forge-reveal-icon {
+  font-size: 56px;
+  line-height: 1;
+  margin: 8px 0 12px;
+  animation: forgeIconFloat 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+.forge-reveal-name {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.forge-reveal-rarity {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.forge-reveal-stats {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #8fd18f;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,0.15);
+}
+
+@keyframes forgeRevealFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes forgeRevealPop {
+  from { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+  to { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes forgeLabelPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes forgeIconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }

@@ -169,9 +169,9 @@ export const BALANCE = {
   },
 
   loot: {
-    base_drop_rate: 0.15,      // 15% de chance par kill normal
-    drop_rate_per_wave: 0.005, // +0.5% par wave (wave 20 = 25%)
-    boss_drop_rate: 1.0,       // 100% garanti
+    base_drop_rate: 0.08,      // 8% par kill normal (baissé de 15% pour éviter spam d'items sur vagues biomes)
+    drop_rate_per_wave: 0.003, // +0.3% par wave (wave 20 = 14%, wave 50 = 23%)
+    boss_drop_rate: 1.0,       // 100% garanti sur boss (inchangé)
     boss_double_drop: 0.30,    // 30% chance d'un 2ème drop sur un boss
     inventory_size: 60,        // slots max d'inventaire (15 equipes + 45 libres, evite auto-sell agressif)
     forge_costs: [50, 200, 800, 3000], // or pour forger C→U, U→R, R→E, E→L

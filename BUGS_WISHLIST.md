@@ -1,0 +1,80 @@
+# Wishlist de bugs et améliorations (source prioritaire pour les runs auto)
+
+**Consigne aux runs d'auto-amélioration :**
+Tu dois consulter ce fichier à chaque run et **prioriser** les items listés ici. Un item coché `[x]` est fait, `[ ]` est à faire. Lorsque tu traites un item, ajoute son numéro dans ton entrée du LOG et coche-le dans ce fichier (commit inclus dans ta branche).
+
+Si tous les items de cette liste sont déjà cochés, retombe sur la recherche libre d'idées.
+
+---
+
+## 🔧 Bugs à fixer
+
+- [ ] **#B2 — Apparition des alliés cassée sur nouveau biome**
+  Quand le joueur change de biome, l'affichage des alliés a un glitch (à localiser). Investiguer dans `CombatScene.js` (transition biome) et `Fighter.js` (visuel).
+
+- [ ] **#B7 — Timeline grisée lors du respawn sur vague supérieure**
+  La timeline/progress bar reste grisée ou dans un mauvais état quand un héros respawn alors que la vague a déjà avancé. Investiguer dans la gestion de respawn de `Fighter.js` et l'UI des barres.
+
+- [ ] **#B11 — Conflit de niveaux des héros à vérifier**
+  Vague : vérifier la cohérence des niveaux entre save/load, fusion, et affichage. Probablement une désynchronisation entre `Fighter.level` et ce qui est persisté dans `SaveSystem` ou `GachaSystem`.
+
+- [ ] **#B12 — x4 qui saute toutes les 5 vagues**
+  Le mode x4 (speed up) a un saut/glitch périodique. Chercher dans `CombatScene.js` (time scale) ou `CombatSystem.js` (speed multiplier).
+
+- [ ] **#B14 — Temps affiché dans stats fin de combat incorrect en x2/x4**
+  Vérifier : quand le combat tourne en accéléré, le "temps de combat" reporté doit-il être le temps réel écoulé OU le temps "jeu" (multiplié) ? Probablement un bug de calcul dans `TelemetrySystem` ou l'écran de fin de run.
+
+---
+
+## ✨ Quick wins UX (petit effort)
+
+- [ ] **#Q1 — Stuff pour le healer** (investigation faite 2026-04-20)
+  **DÉCOUVERTE :** les enchants `heal_power` (flat) et `heal_received` (set bonus Grottes) sont **définis dans `src/data/items.js` mais jamais appliqués dans `CombatSystem.js`**. Le stuff healer existe en data mais n'a aucun effet fonctionnel.
+  **À faire :**
+  1. Brancher `heal_power` dans le calcul de soin du healer dans `CombatSystem` (la stat doit augmenter les HP restaurés).
+  2. Brancher `heal_received` comme multiplicateur sur les HP reçus par les alliés.
+  3. Optionnellement ajouter un enchant `heal_percent` (% multiplicateur de soin) dans `ENCHANT_POOL`.
+  Fichiers probables : `src/systems/CombatSystem.js`, `src/entities/Fighter.js`.
+
+- [x] **#Q3 — Pictos sur les récompenses de missions** ✅ Session manuelle 2026-04-20
+  Pictos 💰 (or) et ◇ (gems) ajoutés dans MissionScreen + MissionToast, avec CSS dédié (drop-shadow, couleurs).
+
+- [x] **#Q4 — Baisser le drop rate d'items par vague** ✅ Session manuelle 2026-04-20
+  `base_drop_rate` : 15% → 8%, `drop_rate_per_wave` : 0.5% → 0.3%. Au wave 20 : 25% → 14%, au wave 50 : 40% → 23%.
+
+- [x] **#Q5 — Animation feedback sur le forge** ✅ Session manuelle 2026-04-20
+  Overlay `forge-reveal-card` avec scale+rotate pop-in, icône flottante, stats affichées, auto-close 2.5s ou clic.
+
+- [x] **#Q6 — Afficher l'or disponible dans l'UI forge** ✅ Session manuelle 2026-04-20
+  Indicateur `forge-gold-indicator` ajouté au-dessus du bouton forge avec or dispo + coût + manque éventuel. Bouton disabled si insuffisant.
+
+- [x] **#Q9 — Fond coloré différent par slot type (arme/armure/anneau)** ✅ Session manuelle 2026-04-20
+  CSS `[data-type="weapon"]` (rouge), `[data-type="armor"]` (bleu), `[data-type="accessory"]` (vert) avec gradient et border assortis.
+
+---
+
+## 🏔 Gros chantiers (NE PAS attaquer en runs auto — sessions dédiées)
+
+> Ces items violent la règle "max 300 lignes / 5 fichiers" des runs automatiques. Laisser pour sessions manuelles avec l'utilisateur.
+
+- [ ] **#G8 — Refonte globale inventaire avec filtre + tri haut de gamme**
+- [ ] **#G10 — Refonte invocations/coffres "grosse dopamine"**
+- [ ] **#G13 — UI 100% étirable auto responsive**
+
+---
+
+## 📝 Comment cocher un item
+
+Quand un run complète un item :
+
+```markdown
+- [x] **#Q6 — Afficher l'or disponible dans l'UI forge** ✅ Run #N (YYYY-MM-DD)
+```
+
+Et dans `IMPROVEMENTS_LOG.md`, mentionner `Wishlist item : #Q6` dans la section "Choix".
+
+---
+
+## 📅 Historique
+
+- **2026-04-20** : Wishlist créée par l'utilisateur (14 items identifiés)

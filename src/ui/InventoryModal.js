@@ -323,8 +323,16 @@ export class InventoryModal {
       const cost = BALANCE.loot.forge_costs[rarityIdx] ?? 0;
 
       if (sameRarity && rarityIdx < 4) {
+        const gold = ResourceSystem.gold;
+        const canAfford = gold >= cost;
         forgeDiv.innerHTML = `
-          <button class="action-btn" id="forge-btn" style="width:100%;">
+          <div class="forge-gold-indicator ${canAfford ? '' : 'forge-gold-insufficient'}">
+            <span>Votre or : <strong>${gold.toLocaleString('fr-FR')}◆</strong></span>
+            <span class="forge-gold-sep">—</span>
+            <span>Coût : <strong>${cost.toLocaleString('fr-FR')}◆</strong></span>
+            ${!canAfford ? `<span class="forge-gold-missing">(manque ${(cost - gold).toLocaleString('fr-FR')}◆)</span>` : ''}
+          </div>
+          <button class="action-btn" id="forge-btn" style="width:100%;" ${canAfford ? '' : 'disabled'}>
             <span class="action-btn-icon">⚡</span>
             <div class="action-btn-text">
               <span class="action-btn-label">Forger (${cost}◆)</span>
@@ -335,9 +343,11 @@ export class InventoryModal {
         forgeDiv.querySelector('#forge-btn')?.addEventListener('click', () => {
           if (ResourceSystem.gold < cost) return;
           ResourceSystem.spendGold(cost);
-          ItemSystem.forge(this._selectedForForge);
+          const result = ItemSystem.forge(this._selectedForForge);
           this._selectedForForge = [];
           this._refresh();
+          // Animation reveal du résultat de forge
+          if (result?.item) this._showForgeReveal(result.item);
         });
       } else {
         forgeDiv.innerHTML = `<div style="color:var(--damage);">Même rareté requise</div>`;
@@ -345,6 +355,34 @@ export class InventoryModal {
     } else {
       forgeDiv.innerHTML = `<div style="font-size:11px;color:var(--text-tertiary);">${this._selectedForForge.length}/3 (clic droit)</div>`;
     }
+  }
+
+  /**
+   * Animation de reveal du nouvel item forgé.
+   * Overlay full-modal, icône de l'item, rareté colorée, stats, auto-fermeture 2.5s.
+   */
+  _showForgeReveal(item) {
+    if (!this.modal?.body) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'forge-reveal-overlay';
+    overlay.innerHTML = `
+      <div class="forge-reveal-card" style="border-color:${item.rarityColor};box-shadow:0 0 40px ${item.rarityColor};">
+        <div class="forge-reveal-label" style="color:${item.rarityColor};">✨ FORGE RÉUSSIE ✨</div>
+        <div class="forge-reveal-icon" style="color:${item.rarityColor};">${item.icon || '✦'}</div>
+        <div class="forge-reveal-name">${item.name}</div>
+        <div class="forge-reveal-rarity" style="color:${item.rarityColor};">${item.rarityName}</div>
+        <div class="forge-reveal-stats">
+          ${Object.entries(item.stats || {}).map(([k, v]) => `<span>+${v} ${k.toUpperCase()}</span>`).join(' · ')}
+        </div>
+      </div>
+    `;
+    this.modal.body.appendChild(overlay);
+    // Clic pour fermer + auto-close 2.5s
+    const close = () => {
+      if (overlay.parentNode) overlay.remove();
+    };
+    overlay.addEventListener('click', close, { once: true });
+    setTimeout(close, 2500);
   }
 
   destroy() {

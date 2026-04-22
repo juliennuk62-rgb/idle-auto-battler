@@ -100,7 +100,10 @@ export class MissionScreen {
   _renderMission(m) {
     const pct = Math.min(100, Math.round((m.progress / m.target) * 100));
     const done = m.progress >= m.target;
-    const rewardText = m.reward.gold ? `${m.reward.gold} or` : `${m.reward.gems} gemme${m.reward.gems > 1 ? 's' : ''}`;
+    // Pictos colorés pour les récompenses : lisibilité instantanée.
+    const rewardText = m.reward.gold
+      ? `<span class="mission-reward"><span class="mission-reward-icon reward-gold">💰</span>${m.reward.gold.toLocaleString('fr-FR')}</span>`
+      : `<span class="mission-reward"><span class="mission-reward-icon reward-gems">◇</span>${m.reward.gems}</span>`;
 
     return `
       <div class="mission-item ${m.claimed ? 'mission-done' : done ? 'mission-ready' : ''}">
@@ -109,7 +112,7 @@ export class MissionScreen {
           <div class="mission-item-bar">
             <div class="mission-item-bar-fill" style="width:${pct}%;"></div>
           </div>
-          <div class="mission-item-progress">${m.progress}/${m.target} — ${rewardText}</div>
+          <div class="mission-item-progress">${m.progress}/${m.target} · ${rewardText}</div>
         </div>
         <div class="mission-item-action">
           ${m.claimed
