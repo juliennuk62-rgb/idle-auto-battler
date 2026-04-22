@@ -58,7 +58,7 @@ Si tous les items de cette liste sont déjà cochés, retombe sur la recherche l
 > Ces items violent la règle "max 300 lignes / 5 fichiers" des runs automatiques. Laisser pour sessions manuelles avec l'utilisateur.
 
 - [ ] **#G8 — Refonte globale inventaire avec filtre + tri haut de gamme**
-- [ ] **#G10 — Refonte invocations/coffres "grosse dopamine"**
+- [x] **#G10 — Refonte invocations/coffres "grosse dopamine"** ✅ Session manuelle 2026-04-20 (v3.9) — partie invocations. **Partie coffres reste à faire** (appliquer le même principe dans ChestShopScreen).
 - [ ] **#G13 — UI 100% étirable auto responsive**
 
 ---
