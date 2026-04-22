@@ -120,6 +120,20 @@ const SOUNDS = {
     { freq: 1200, duration: 0.3, type: 'sine', volume: 0.25, slide: 200 },
   ], 0.1),
 
+  // Drone de suspense — monte en fréquence, 700ms, joué avant le meteor (SSR+).
+  summonSuspense: () => sequence([
+    { freq: 80,  duration: 0.2, type: 'sawtooth', volume: 0.08 },
+    { freq: 120, duration: 0.2, type: 'sawtooth', volume: 0.10, slide: 40 },
+    { freq: 180, duration: 0.3, type: 'sine',     volume: 0.12, slide: 60 },
+  ], 0.18),
+
+  // Crash / impact — grave + bruité, joué sur l'impact du meteor.
+  summonCrash: () => sequence([
+    { freq: 60,  duration: 0.08, type: 'sawtooth', volume: 0.25 },
+    { freq: 40,  duration: 0.15, type: 'square',   volume: 0.20, slide: -20 },
+    { freq: 120, duration: 0.12, type: 'triangle', volume: 0.15 },
+  ], 0.03),
+
   // ── Loot ──
   lootCommon:  () => beep({ freq: 800, duration: 0.06, type: 'square', volume: 0.1 }),
   lootRare:    () => sequence([
