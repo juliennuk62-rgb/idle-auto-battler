@@ -57,8 +57,8 @@ Si tous les items de cette liste sont déjà cochés, retombe sur la recherche l
 
 > Ces items violent la règle "max 300 lignes / 5 fichiers" des runs automatiques. Laisser pour sessions manuelles avec l'utilisateur.
 
-- [ ] **#G8 — Refonte globale inventaire avec filtre + tri haut de gamme**
-- [x] **#G10 — Refonte invocations/coffres "grosse dopamine"** ✅ Session manuelle 2026-04-20 (v3.9) — partie invocations. **Partie coffres reste à faire** (appliquer le même principe dans ChestShopScreen).
+- [x] **#G8 — Refonte globale inventaire avec filtre + tri haut de gamme** ✅ Session manuelle 2026-04-20 (v4.0) — toolbar compteur + search + filtres rareté/set/équipé + tri 6 options + batch sell par rareté + comparateur diff ATK/HP + badges ON/tier + responsive mobile.
+- [x] **#G10 — Refonte invocations/coffres "grosse dopamine"** ✅ Session manuelle 2026-04-20 (v3.9 + v4.0) — invocations (suspense/crash/aura/typewriter) + coffres (stars bg / aura pulse / halo glow / 8 rays divergents / screen shake / vibration / skip button / sons).
 - [ ] **#G13 — UI 100% étirable auto responsive**
 
 ---

@@ -135,7 +135,11 @@ const SOUNDS = {
   ], 0.03),
 
   // ── Loot ──
-  lootCommon:  () => beep({ freq: 800, duration: 0.06, type: 'square', volume: 0.1 }),
+  lootCommon:   () => beep({ freq: 800, duration: 0.06, type: 'square', volume: 0.1 }),
+  lootUncommon: () => sequence([
+    { freq: 700, duration: 0.07, type: 'square',   volume: 0.11 },
+    { freq: 900, duration: 0.08, type: 'triangle', volume: 0.13 },
+  ], 0.06),
   lootRare:    () => sequence([
     { freq: 700, duration: 0.08, type: 'square', volume: 0.12 },
     { freq: 1000, duration: 0.1, type: 'triangle', volume: 0.15 },
@@ -145,6 +149,12 @@ const SOUNDS = {
     { freq: 900, duration: 0.1, type: 'triangle', volume: 0.18 },
     { freq: 1200, duration: 0.15, type: 'sine', volume: 0.2 },
   ], 0.08),
+  lootLegendary: () => sequence([
+    { freq: 550, duration: 0.1,  type: 'triangle', volume: 0.18 },
+    { freq: 800, duration: 0.1,  type: 'triangle', volume: 0.2 },
+    { freq: 1100, duration: 0.12, type: 'sine',    volume: 0.22 },
+    { freq: 1500, duration: 0.2,  type: 'sine',    volume: 0.22, slide: 200 },
+  ], 0.09),
   lootMythic:  () => sequence([
     { freq: 500, duration: 0.1, type: 'triangle', volume: 0.2 },
     { freq: 800, duration: 0.1, type: 'sine', volume: 0.22 },
