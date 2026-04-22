@@ -105,6 +105,16 @@ export class TelemetrySystemImpl {
    * Enregistre un événement dans le combat courant. No-op si désactivé ou
    * si aucun combat n'est en cours.
    */
+  /**
+   * BUG FIX B14 : appelé depuis CombatScene.update() avec scaledDelta
+   * (delta × timeScale). Accumule le temps "jeu" du combat courant pour
+   * que la durée reportée soit cohérente entre les modes ×1/×2/×4.
+   */
+  tickGameTime(scaledDeltaMs) {
+    if (!this.enabled || !this.currentCombat) return;
+    this.currentCombat.gameTimeElapsed += scaledDeltaMs;
+  }
+
   recordEvent(type, payload = {}) {
     if (!this.enabled) return;
     if (!this.currentCombat) return;
@@ -141,6 +151,10 @@ export class TelemetrySystemImpl {
       waveId,
       startedAt: now,
       startedAtEpoch: now,
+      // BUG FIX B14 : on accumule le temps "jeu" (delta × timeScale) pour
+      // que la durée affichée soit cohérente peu importe le mode ×1/×2/×4.
+      // Alimenté par tickGameTime() appelé depuis CombatScene.update().
+      gameTimeElapsed: 0,
       team: team.map((u) => ({ id: u.id, class: u.class, grade: u.grade ?? 1, level: u.level ?? 1 })),
       monsters: monsters.map((m) => ({ id: m.id, class: m.class, grade: m.grade ?? 1, level: m.level ?? 1 })),
       events: [],
@@ -163,10 +177,18 @@ export class TelemetrySystemImpl {
     if (!this.enabled) return;
     if (!this.currentCombat) return;
 
-    const duration = safeNow() - this.currentCombat.startedAt;
+    // BUG FIX B14 : on privilégie le temps "jeu" (accumulé via tickGameTime).
+    // Si le joueur a joué en ×4 pendant 2.5s réelles, gameTimeElapsed vaudra 10s
+    // (= temps qu'il aurait eu en ×1). Fallback sur le wall-clock si jamais
+    // tickGameTime n'a pas été appelé (cas edge).
+    const wallClockDuration = safeNow() - this.currentCombat.startedAt;
+    const duration = this.currentCombat.gameTimeElapsed > 0
+      ? Math.round(this.currentCombat.gameTimeElapsed)
+      : wallClockDuration;
     this.recordEvent('wave_ended', {
       result: result.outcome,
       duration,
+      wallClockDuration,
       gold: result.gold ?? 0,
       xp: result.xp ?? 0,
     });

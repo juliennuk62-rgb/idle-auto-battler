@@ -453,6 +453,19 @@ export class Fighter {
    *
    * @returns {number} nombre de niveaux gagnés (0 si rien)
    */
+  /**
+   * BUG FIX B11 : setter de niveau qui force la recomputation des stats.
+   * À utiliser pour toute modification externe de `fighter.level` afin
+   * d'éviter la désynchronisation level affiché / stats réelles.
+   */
+  setLevel(newLevel) {
+    const lvl = Math.max(1, Math.floor(newLevel));
+    if (lvl === this.level) return;
+    this.level = lvl;
+    this._recomputeStats();
+    this._updateLabel?.();
+  }
+
   gainXp(amount) {
     if (this.class === 'monster') return 0;
     if (!Number.isFinite(amount) || amount <= 0) return 0;
@@ -514,6 +527,10 @@ export class Fighter {
       // Equipment bonus — items flat stats.
       const equipped = ItemSystem.getEquipped(this.id);
       const items = [equipped.weapon, equipped.armor, equipped.accessory].filter(Boolean);
+      // BUG FIX Q1 : prépare les stats heal_power (flat) pour les healers.
+      // Alimenté par les enchants `heal_power` des items équipés. Consommé par
+      // CombatSystem._resolveHeal() pour augmenter les HP restaurés.
+      this.healPower = 0;
       for (const item of items) {
         atk += item.stats.atk || 0;
         hp += item.stats.hp || 0;
@@ -521,6 +538,7 @@ export class Fighter {
         for (const e of (item.enchants || [])) {
           if (e.mode === 'flat' && e.stat === 'atk') atk += e.value;
           if (e.mode === 'flat' && e.stat === 'hp') hp += e.value;
+          if (e.mode === 'flat' && e.stat === 'heal') this.healPower += e.value;
         }
       }
 
@@ -553,6 +571,9 @@ export class Fighter {
       const setBonus = computeSetBonus(items);
       atkPct += setBonus.atk_percent || 0;
       hpPct += setBonus.hp_percent || 0;
+      // BUG FIX Q1 : le set bonus "heal_received" du set Grottes augmente les HP
+      // que CE fighter reçoit quand il est soigné. Consommé par CombatSystem._resolveHeal().
+      this.healReceived = setBonus.heal_received || 0;
 
       this.maxHp = Math.round(hp * (1 + hpPct / 100));
       this.atk = Math.round(atk * (1 + atkPct / 100));
@@ -564,6 +585,8 @@ export class Fighter {
     } else {
       this.maxHp = stats.hp;
       this.atk = stats.atk;
+      this.healPower = 0;
+      this.healReceived = 0;
     }
     this.hp = this.maxHp; // full heal au levelup
     this._updateHealthBar();

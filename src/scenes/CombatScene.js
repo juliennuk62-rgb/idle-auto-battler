@@ -281,6 +281,10 @@ export class CombatScene extends Phaser.Scene {
     // Applique le timeScale au delta pour que ×2/×4 accélère aussi le mouvement.
     const scaledDelta = delta * (this.time.timeScale || 1);
 
+    // BUG FIX B14 : alimente TelemetrySystem pour que la durée reportée
+    // en fin de combat reflète le temps "jeu" (cohérent en ×1/×2/×4).
+    TelemetrySystem.tickGameTime(scaledDelta);
+
     const teamA = this.combat.teamA;
     const teamB = this.combat.teamB;
 

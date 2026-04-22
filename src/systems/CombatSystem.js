@@ -278,7 +278,14 @@ export class CombatSystem {
     // Bonus heal% des synergies
     const synergyHealBonus = this._activeSynergies?.some(s => s.bonus.healPercent) ?
       this._activeSynergies.reduce((sum, s) => sum + (s.bonus.healPercent || 0), 0) : 0;
-    const healAmount = Math.max(1, Math.round(healer.atk * variance * (1 + synergyHealBonus / 100)));
+    // BUG FIX Q1 : brancher healPower (flat, enchants) + healReceived (set Grottes).
+    // healPower vient des enchants "heal_power" équipés sur le healer.
+    // healReceived vient du set bonus 3 pièces du set Grottes sur la CIBLE du soin.
+    const healerHealPower = healer.healPower || 0;
+    const targetHealReceived = target.healReceived || 0;
+    const basePower = healer.atk + healerHealPower;
+    const totalBonus = synergyHealBonus + targetHealReceived;
+    const healAmount = Math.max(1, Math.round(basePower * variance * (1 + totalBonus / 100)));
     const hpBefore = target.hp;
     target.heal(healAmount);
     const actualHeal = target.hp - hpBefore;
@@ -503,11 +510,16 @@ export class CombatSystem {
         ease: 'Quad.Out',
       });
 
-      // Slow-mo sur boss kill — ralentit le jeu 250ms pour un effet dramatique
+      // Slow-mo sur boss kill — ralentit le jeu 250ms pour un effet dramatique.
+      // BUG FIX B12 : on sauvegarde le timeScale actuel (peut être x2/x4 choisi
+      // par le joueur) et on le restaure, au lieu de hardcoder = 1. Sinon chaque
+      // boss kill reset le speed choisi, ce qui faisait "sauter" le x4 toutes
+      // les 5 vagues.
       if (isBossKill) {
+        const prevTimeScale = this.scene.time.timeScale;
         this.scene.time.timeScale = 0.3;
         this.scene.time.delayedCall(250, () => {
-          this.scene.time.timeScale = 1;
+          this.scene.time.timeScale = prevTimeScale;
         });
 
         // Dialogue de défaite du boss scénarisé (si présent)
@@ -918,8 +930,14 @@ export class CombatSystem {
     this._spawnWaveMonsters(wave);
     this.currentWave = wave;
     this._pendingNextWave = null;
-    // Reprend les timers alliés.
+    // BUG FIX B2 : force le respawn de tous les alliés morts avant de reprendre.
+    // Sans ça, un héros qui mourait pile pendant le changement de biome pouvait
+    // rester "mort" au démarrage de la vague suivante, ou apparaître à la mauvaise
+    // position à cause d'un timer respawn interrompu.
     for (const f of this.teamA) {
+      if (!f.isAlive && typeof f.respawn === 'function') {
+        f.respawn();
+      }
       if (f.attackTimer) f.attackTimer.paused = false;
     }
     TelemetrySystem.startCombat(this.currentWave, this.teamA, this.teamB);

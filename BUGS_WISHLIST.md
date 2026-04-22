@@ -9,32 +9,27 @@ Si tous les items de cette liste sont déjà cochés, retombe sur la recherche l
 
 ## 🔧 Bugs à fixer
 
-- [ ] **#B2 — Apparition des alliés cassée sur nouveau biome**
-  Quand le joueur change de biome, l'affichage des alliés a un glitch (à localiser). Investiguer dans `CombatScene.js` (transition biome) et `Fighter.js` (visuel).
+- [x] **#B2 — Apparition des alliés cassée sur nouveau biome** ✅ v4.2
+  Fix dans `CombatSystem.startNextBiome()` : force le respawn de tous les alliés morts avant de reprendre le combat. Sans ça, un héros qui mourait pile pendant le changement de biome pouvait rester "mort" (timer respawn interrompu par la pause de préparation).
 
-- [ ] **#B7 — Timeline grisée lors du respawn sur vague supérieure**
-  La timeline/progress bar reste grisée ou dans un mauvais état quand un héros respawn alors que la vague a déjà avancé. Investiguer dans la gestion de respawn de `Fighter.js` et l'UI des barres.
+- [x] **#B7 — Timeline grisée lors du respawn sur vague supérieure** ✅ v4.2
+  Résolu par le fix #B2 — même racine. La classe `.dead` sur UnitCard (qui applique `grayscale(1)`) restait coincée quand le fighter ne se ressuscitait pas au biome change. Le respawn forcé résout l'affichage grisé.
 
-- [ ] **#B11 — Conflit de niveaux des héros à vérifier**
-  Vague : vérifier la cohérence des niveaux entre save/load, fusion, et affichage. Probablement une désynchronisation entre `Fighter.level` et ce qui est persisté dans `SaveSystem` ou `GachaSystem`.
+- [x] **#B11 — Conflit de niveaux des héros à vérifier** ✅ v4.2
+  Ajout d'une méthode `Fighter.setLevel(newLevel)` qui force `_recomputeStats()` + `_updateLabel()`. À utiliser pour toute modification externe de `fighter.level` afin d'éviter la désynchronisation level affiché / stats réelles.
 
-- [ ] **#B12 — x4 qui saute toutes les 5 vagues**
-  Le mode x4 (speed up) a un saut/glitch périodique. Chercher dans `CombatScene.js` (time scale) ou `CombatSystem.js` (speed multiplier).
+- [x] **#B12 — x4 qui saute toutes les 5 vagues** ✅ v4.2
+  Bug trouvé : le slow-mo boss kill (ligne 510 CombatSystem) remettait `timeScale = 1` en dur au lieu de restaurer la valeur avant slow-mo. Comme les boss apparaissent toutes les 5 vagues, le speed x2/x4 choisi par le joueur était reset à x1 à chaque boss. Fix : sauvegarde de `prevTimeScale` avant slow-mo et restauration après.
 
-- [ ] **#B14 — Temps affiché dans stats fin de combat incorrect en x2/x4**
-  Vérifier : quand le combat tourne en accéléré, le "temps de combat" reporté doit-il être le temps réel écoulé OU le temps "jeu" (multiplié) ? Probablement un bug de calcul dans `TelemetrySystem` ou l'écran de fin de run.
+- [x] **#B14 — Temps affiché dans stats fin de combat incorrect en x2/x4** ✅ v4.2
+  Fix dans `TelemetrySystem` : ajout d'un champ `gameTimeElapsed` alimenté par `tickGameTime(scaledDelta)` appelé depuis `CombatScene.update()`. La durée reportée dans les stats utilise désormais le temps "jeu" (cohérent quel que soit le timeScale) au lieu du temps réel wall-clock.
 
 ---
 
 ## ✨ Quick wins UX (petit effort)
 
-- [ ] **#Q1 — Stuff pour le healer** (investigation faite 2026-04-20)
-  **DÉCOUVERTE :** les enchants `heal_power` (flat) et `heal_received` (set bonus Grottes) sont **définis dans `src/data/items.js` mais jamais appliqués dans `CombatSystem.js`**. Le stuff healer existe en data mais n'a aucun effet fonctionnel.
-  **À faire :**
-  1. Brancher `heal_power` dans le calcul de soin du healer dans `CombatSystem` (la stat doit augmenter les HP restaurés).
-  2. Brancher `heal_received` comme multiplicateur sur les HP reçus par les alliés.
-  3. Optionnellement ajouter un enchant `heal_percent` (% multiplicateur de soin) dans `ENCHANT_POOL`.
-  Fichiers probables : `src/systems/CombatSystem.js`, `src/entities/Fighter.js`.
+- [x] **#Q1 — Stuff pour le healer** ✅ v4.2
+  `Fighter._recomputeStats()` calcule désormais `this.healPower` (depuis les enchants `heal_power` flat) et `this.healReceived` (depuis le set bonus 3-pièces Grottes). `CombatSystem._resolveHeal()` utilise `(healer.atk + healer.healPower) × (1 + (synergies + target.healReceived)%)` pour le calcul de soin. Les items healer ont maintenant un vrai impact.
 
 - [x] **#Q3 — Pictos sur les récompenses de missions** ✅ Session manuelle 2026-04-20
   Pictos 💰 (or) et ◇ (gems) ajoutés dans MissionScreen + MissionToast, avec CSS dédié (drop-shadow, couleurs).
